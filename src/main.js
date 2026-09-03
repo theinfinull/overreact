@@ -1,3 +1,5 @@
+import { createElement } from "./overreact";
+
 // 1. get root element
 const root = document.getElementById("root");
 
@@ -7,12 +9,20 @@ const element = {
     props: {
         id: "maindiv",
     },
-    children: "let's not overreact",
+    children: [
+        {
+            type: "h1",
+            props: null,
+            children: "Heading",
+        },
+        {
+            type: "p",
+            children: "Lorem ipsium, blah blah blah. Something like that",
+        },
+    ],
 };
 
-const node = document.createElement(element.type);
-node.setAttribute("id", element.props.id);
-node.appendChild(document.createTextNode(element.children));
+const node = createElement(element);
 
-// 3. append node to root
+// 3. append node to root (NOTE: now it won't work coz it expects object of type 'Node')
 root.appendChild(node);
