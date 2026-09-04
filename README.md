@@ -1,16 +1,36 @@
-# React + Vite
+<p align="center">
+  <img src="public/favicon-512.png" alt="Overreact logo" width="160" />
+</p>
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+# Overreact
 
-Currently, two official plugins are available:
+DIY React built from Rodrigo Pombo's legendary guide - [Build your own React](https://pomb.us/build-your-own-react/).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Requirements
 
-## React Compiler
+- node + npm (to run babel)
+- static file server of some kind (`npm run dev` will do)
+- any browser with `requestIdleCallback` support (which means anything but Safari)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Layout
 
-## Expanding the Oxlint configuration
+```text
+overreact/
+├── index.html              - Points at ./dist/main.js
+├── babel.config.json       - Configures JSX to compile using the overreact library
+├── src/
+│   ├── overreact.js        - The overreact library runtime implementation
+│   └── main.jsx            - Demo app written on top of overreact
+└── dist/                   - Babel output directory containing the transpiled JS
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+Babel dumps transpiled .jsx/js from `src/` into `dist/`.
+
+## Commands
+
+```bash
+npm install
+npm run build   # src/ → dist/ (once)
+npm run watch   # src/ → dist/ on every save
+npm run dev     # watch + serve the repo root
+```

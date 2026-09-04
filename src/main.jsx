@@ -1,9 +1,8 @@
-import * as overreact from "./overreact";
+import * as overreact from "./overreact.js";
 
 // 1. get root element
 const container = document.getElementById("root");
 
-/** @jsx overreact.createElement */
 const mainDivID = "maindiv";
 const element = (
     <div id={mainDivID}>
@@ -12,5 +11,5 @@ const element = (
     </div>
 );
 
-// 3. append node to root (NOTE: now it won't work coz it expects object of type 'Node')
+// 3. append node to root
 overreact.render(element, container);

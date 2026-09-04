@@ -4,20 +4,15 @@
     "version": "0.0.0",
     "type": "module",
     "scripts": {
-        "dev": "vite",
-        "build": "vite build",
-        "lint": "oxlint",
-        "preview": "vite preview"
-    },
-    "dependencies": {
-        "react": "^19.2.8",
-        "react-dom": "^19.2.8"
+        "build": "babel src --out-dir dist --extensions .js,.jsx",
+        "watch": "babel src --out-dir dist --extensions .js,.jsx --watch",
+        "dev": "npx --yes concurrently -k \"npm run watch\" \"npx --yes serve .\"",
+        "lint": "oxlint"
     },
     "devDependencies": {
-        "@types/react": "^19.2.18",
-        "@types/react-dom": "^19.2.4",
-        "@vitejs/plugin-react": "^6.1.0",
-        "oxlint": "^1.79.0",
-        "vite": "^8.2.2"
+        "@babel/cli": "^7.28.3",
+        "@babel/core": "^7.28.3",
+        "@babel/preset-react": "^7.27.1",
+        "oxlint": "^1.79.0"
     }
 }
