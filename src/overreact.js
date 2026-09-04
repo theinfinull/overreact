@@ -1,4 +1,4 @@
-export function createElement(type, props, ...children) {
+function createElement(type, props, ...children) {
     return {
         type,
         props: {
@@ -8,7 +8,7 @@ export function createElement(type, props, ...children) {
     };
 }
 
-export function createTextElement(text) {
+function createTextElement(text) {
     return {
         type: "TEXT_ELEMENT",
         props: {
@@ -17,3 +17,18 @@ export function createTextElement(text) {
         },
     };
 }
+
+function render(element, container) {
+    const dom = element.type === "TEXT_ELEMENT" ? document.createTextNode("") : document.createElement(element.type);
+
+    const isProperty = (key) => key !== "children";
+    Object.keys(element.props)
+        .filter(isProperty)
+        .forEach((propName) => (dom[propName] = element.props[propName]));
+
+    element.props.children.forEach((child) => render(child, dom));
+
+    container.appendChild(dom);
+}
+
+export { createElement, render };
