@@ -32,28 +32,24 @@ const isNew = (prev, next) => (key) => prev[key] !== next[key];
 const isRemoved = (next) => (key) => !(key in next);
 
 function updateDom(dom, prevProps, newProps) {
-    // remove newly added or old event listeners
     Object.keys(prevProps)
         .filter(isEvent)
-        .filter((key) => !(key in prevProps) || isNew(prevProps, newProps)(key))
+        .filter((key) => !(key in newProps) || isNew(prevProps, newProps)(key))
         .forEach((prop) => {
             const eventType = prop.toLowerCase().substring(2);
             dom.removeEventListener(eventType, prevProps[prop]);
         });
 
-    // unset old props
     Object.keys(prevProps)
         .filter(isProperty)
         .filter(isRemoved(newProps))
         .forEach((prop) => (dom[prop] = ""));
 
-    // set new props
     Object.keys(newProps)
         .filter(isProperty)
         .filter(isNew(prevProps, newProps))
         .forEach((prop) => (dom[prop] = newProps[prop]));
 
-    // add event listeners for newly added ones
     Object.keys(newProps)
         .filter(isEvent)
         .filter(isNew(prevProps, newProps))
