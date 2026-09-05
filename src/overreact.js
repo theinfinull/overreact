@@ -92,7 +92,6 @@ function commitWork(fiber) {
         return;
     }
 
-    // as functions components don't have dom, we need to find it's nearest parent with dom
     let domParentFiber = fiber.parent;
     while (!domParentFiber.dom) {
         domParentFiber = domParentFiber.parent;
@@ -154,8 +153,13 @@ function performUnitOfWork(fiber) {
     }
 }
 
+let wipFiber = null;
+let hookIndex = null;
+
 function updateFunctionComponent(fiber) {
-    // in a function component, children come from running the function instead of getting them directly from the props
+    wipFiber = fiber;
+    hookIndex = 0;
+    wipFiber.hooks = [];
     const children = [fiber.type(fiber.props)];
     reconcileChildren(fiber, children);
 }
@@ -222,8 +226,36 @@ function reconcileChildren(parentFiber, children) {
     }
 }
 
-// makes oveereact globally accessible, so each .jsx component can access it
-const overreact = { createElement, render };
-globalThis.overreact = overreact;
+function useState(initial) {
+    const oldHook = wipFiber.alternate && wipFiber.alternate.hooks && wipFiber.alternate.hooks[hookIndex];
+    const hook = {
+        state: oldHook ? oldHook.state : initial,
+        queue: [],
+    };
 
-export { createElement, render };
+    const actions = oldHook ? oldHook.queue : [];
+    actions.forEach((action) => {
+        hook.state = action(hook.state);
+    });
+
+    const setState = (action) => {
+        hook.queue.push(action);
+        wipRoot = {
+            dom: currentRoot.dom,
+            props: currentRoot.props,
+            alternate: currentRoot,
+        };
+        nextUnitOfWork = wipRoot;
+        deletions = [];
+    };
+
+    wipFiber.hooks.push(hook);
+    hookIndex++;
+    return [hook.state, setState];
+}
+
+function useOverReact() {
+    globalThis.overreact = { createElement, render, useState };
+}
+
+export { useOverReact };

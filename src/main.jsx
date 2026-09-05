@@ -1,4 +1,8 @@
-import "./overreact.js";
+import { useOverReact } from "./overreact.js";
 import App from "./components/App.js";
 
-overreact.render(<App appName="Overreact" />, document.getElementById("root"));
+useOverReact();
+
+const container = document.getElementById("root");
+
+overreact.render(<App appName="Overreact" />, container);

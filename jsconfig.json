@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "jsx": "react",
+        "jsxFactory": "overreact.createElement",
+        "checkJs": false,
+        "noEmit": true
+    },
+    "include": ["src/**/*", "overreact.d.ts"]
+}
