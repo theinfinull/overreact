@@ -17,15 +17,18 @@ DIY React built from Rodrigo Pombo's legendary guide - [Build your own React](ht
 ```text
 overreact/
 ├── index.html
-├── babel.config.json       - Configures JSX to compile using the overreact library
+├── babel.config.json
 ├── src/
-│   ├── overreact.js        - runtime; call useOverReact() once to set the global
-│   ├── main.jsx
-│   └── components/
-└── dist/                   - Babel output directory containing the transpiled JS
+│   ├── main.jsx                 - demo entry (call useOverReact once)
+│   ├── components/
+│   └── overreact/               - the library
+│       ├── index.js             - public API + useOverReact()
+│       ├── core.js              - elements, fibers, reconcile, commit
+│       └── hooks.js             - useState
+└── dist/                        - Babel output (browser loads this)
 ```
 
-Babel dumps transpiled .jsx files from `src/` into `dist/` as .js. Call `useOverReact()` in the entry file before any JSX that expects the `overreact` global.
+Babel dumps transpiled files from `src/` into `dist/`. Call `useOverReact()` in the entry file before any JSX that expects the `overreact` global.
 
 ## Commands
 

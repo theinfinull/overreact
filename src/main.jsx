@@ -1,4 +1,4 @@
-import { useOverReact } from "./overreact.js";
+import { useOverReact } from "./overreact/index.js";
 import App from "./components/App.js";
 
 useOverReact();

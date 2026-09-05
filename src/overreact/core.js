@@ -1,12 +1,11 @@
-function createElement(type, props, ...children) {
-    return {
-        type,
-        props: {
-            ...props,
-            children: children.map((child) => (typeof child === "object" ? child : createTextElement(child))),
-        },
-    };
-}
+export const state = {
+    nextUnitOfWork: null,
+    wipRoot: null,
+    currentRoot: null,
+    deletions: null,
+    wipFiber: null,
+    hookIndex: null,
+};
 
 function createTextElement(text) {
     return {
@@ -18,12 +17,14 @@ function createTextElement(text) {
     };
 }
 
-function createDom(fiber) {
-    const dom = fiber.type === "TEXT_ELEMENT" ? document.createTextNode("") : document.createElement(fiber.type);
-
-    updateDom(dom, {}, fiber.props);
-
-    return dom;
+export function createElement(type, props, ...children) {
+    return {
+        type,
+        props: {
+            ...props,
+            children: children.map((child) => (typeof child === "object" ? child : createTextElement(child))),
+        },
+    };
 }
 
 const isEvent = (key) => key.startsWith("on");
@@ -59,28 +60,29 @@ function updateDom(dom, prevProps, newProps) {
         });
 }
 
-let nextUnitOfWork = null;
-let wipRoot = null;
-let currentRoot = null;
-let deletions = null;
+function createDom(fiber) {
+    const dom = fiber.type === "TEXT_ELEMENT" ? document.createTextNode("") : document.createElement(fiber.type);
+    updateDom(dom, {}, fiber.props);
+    return dom;
+}
 
-function render(element, container) {
-    wipRoot = {
+export function render(element, container) {
+    state.wipRoot = {
         dom: container,
         props: {
             children: [element],
         },
-        alternate: currentRoot,
+        alternate: state.currentRoot,
     };
-    deletions = [];
-    nextUnitOfWork = wipRoot;
+    state.deletions = [];
+    state.nextUnitOfWork = state.wipRoot;
 }
 
 function commitRoot() {
-    deletions.forEach(commitWork);
-    commitWork(wipRoot.child);
-    currentRoot = wipRoot;
-    wipRoot = null;
+    state.deletions.forEach(commitWork);
+    commitWork(state.wipRoot.child);
+    state.currentRoot = state.wipRoot;
+    state.wipRoot = null;
 }
 
 function commitWork(fiber) {
@@ -114,21 +116,6 @@ function commitDeletion(fiber, domParent) {
     }
 }
 
-function workLoop(deadline) {
-    let shouldYield = false;
-    while (nextUnitOfWork && !shouldYield) {
-        nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
-        shouldYield = deadline.timeRemaining() < 1;
-    }
-
-    if (!nextUnitOfWork && wipRoot) {
-        commitRoot();
-    }
-
-    requestIdleCallback(workLoop);
-}
-requestIdleCallback(workLoop);
-
 function performUnitOfWork(fiber) {
     const isFunctionComponent = fiber.type instanceof Function;
     if (isFunctionComponent) {
@@ -149,13 +136,10 @@ function performUnitOfWork(fiber) {
     }
 }
 
-let wipFiber = null;
-let hookIndex = null;
-
 function updateFunctionComponent(fiber) {
-    wipFiber = fiber;
-    hookIndex = 0;
-    wipFiber.hooks = [];
+    state.wipFiber = fiber;
+    state.hookIndex = 0;
+    state.wipFiber.hooks = [];
     const children = [fiber.type(fiber.props)];
     reconcileChildren(fiber, children);
 }
@@ -164,9 +148,7 @@ function updateHostComponent(fiber) {
     if (!fiber.dom) {
         fiber.dom = createDom(fiber);
     }
-
-    const children = fiber.props.children;
-    reconcileChildren(fiber, children);
+    reconcileChildren(fiber, fiber.props.children);
 }
 
 function reconcileChildren(parentFiber, children) {
@@ -177,7 +159,6 @@ function reconcileChildren(parentFiber, children) {
     while (idx < children.length || oldFiber != null) {
         const child = children[idx];
         let newFiber = null;
-
         const sameType = oldFiber && child && child.type == oldFiber.type;
 
         if (sameType) {
@@ -204,7 +185,7 @@ function reconcileChildren(parentFiber, children) {
 
         if (oldFiber && !sameType) {
             oldFiber.effectTag = "DELETION";
-            deletions.push(oldFiber);
+            state.deletions.push(oldFiber);
         }
 
         if (oldFiber) {
@@ -222,36 +203,18 @@ function reconcileChildren(parentFiber, children) {
     }
 }
 
-function useState(initial) {
-    const oldHook = wipFiber.alternate && wipFiber.alternate.hooks && wipFiber.alternate.hooks[hookIndex];
-    const hook = {
-        state: oldHook ? oldHook.state : initial,
-        queue: [],
-    };
+function workLoop(deadline) {
+    let shouldYield = false;
+    while (state.nextUnitOfWork && !shouldYield) {
+        state.nextUnitOfWork = performUnitOfWork(state.nextUnitOfWork);
+        shouldYield = deadline.timeRemaining() < 1;
+    }
 
-    const actions = oldHook ? oldHook.queue : [];
-    actions.forEach((action) => {
-        hook.state = action(hook.state);
-    });
+    if (!state.nextUnitOfWork && state.wipRoot) {
+        commitRoot();
+    }
 
-    const setState = (action) => {
-        hook.queue.push(action);
-        wipRoot = {
-            dom: currentRoot.dom,
-            props: currentRoot.props,
-            alternate: currentRoot,
-        };
-        nextUnitOfWork = wipRoot;
-        deletions = [];
-    };
-
-    wipFiber.hooks.push(hook);
-    hookIndex++;
-    return [hook.state, setState];
+    requestIdleCallback(workLoop);
 }
 
-function useOverReact() {
-    globalThis.overreact = { createElement, render, useState };
-}
-
-export { useOverReact };
+requestIdleCallback(workLoop);
