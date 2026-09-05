@@ -8,7 +8,6 @@ let count = 0;
 const incrementCounter = () => {
     count++;
     console.log("counter incremented to: " + count);
-    container.replaceChildren(); // this clears the entire content, so only current render is appended to container
     overreact.render(element(), container);
 };
 

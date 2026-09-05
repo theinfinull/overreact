@@ -21,16 +21,52 @@ function createTextElement(text) {
 function createDom(fiber) {
     const dom = fiber.type === "TEXT_ELEMENT" ? document.createTextNode("") : document.createElement(fiber.type);
 
-    const isProperty = (key) => key !== "children";
-    Object.keys(fiber.props)
-        .filter(isProperty)
-        .forEach((prop) => dom[prop] = fiber.props[prop]);
+    updateDom(dom, {}, fiber.props);
 
     return dom;
 }
 
+const isEvent = (key) => key.startsWith("on");
+const isProperty = (key) => key !== "children" && !isEvent(key);
+const isNew = (prev, next) => (key) => prev[key] !== next[key];
+const isRemoved = (next) => (key) => !(key in next);
+
+function updateDom(dom, prevProps, newProps) {
+    // remove newly added or old event listeners
+    Object.keys(prevProps)
+        .filter(isEvent)
+        .filter((key) => !(key in prevProps) || isNew(prevProps, newProps)(key))
+        .forEach((prop) => {
+            const eventType = prop.toLowerCase().substring(2);
+            dom.removeEventListener(eventType, prevProps[prop]);
+        });
+
+    // unset old props
+    Object.keys(prevProps)
+        .filter(isProperty)
+        .filter(isRemoved(newProps))
+        .forEach((prop) => (dom[prop] = ""));
+
+    // set new props
+    Object.keys(newProps)
+        .filter(isProperty)
+        .filter(isNew(prevProps, newProps))
+        .forEach((prop) => (dom[prop] = newProps[prop]));
+
+    // add event listeners for newly added ones
+    Object.keys(newProps)
+        .filter(isEvent)
+        .filter(isNew(prevProps, newProps))
+        .forEach((prop) => {
+            const eventType = prop.toLowerCase().substring(2);
+            dom.addEventListener(eventType, newProps[prop]);
+        });
+}
+
 let nextUnitOfWork = null;
 let wipRoot = null;
+let currentRoot = null;
+let deletions = null;
 
 function render(element, container) {
     wipRoot = {
@@ -38,29 +74,39 @@ function render(element, container) {
         props: {
             children: [element],
         },
+        alternate: currentRoot,
     };
+    deletions = [];
     nextUnitOfWork = wipRoot;
 }
 
 function commitRoot() {
+    deletions.forEach(commitWork);
     commitWork(wipRoot.child);
+    currentRoot = wipRoot;
     wipRoot = null;
 }
 
-function commitWork(processedFiber) {
-    if (!processedFiber) {
+function commitWork(fiber) {
+    if (!fiber) {
         return;
     }
-    processedFiber.parent.dom.appendChild(processedFiber.dom);
-    commitWork(processedFiber.child);
-    commitWork(processedFiber.sibling);
+    const domParent = fiber.parent.dom;
+    if (fiber.effectTag === "PLACEMENT" && fiber.dom != null) {
+        domParent.appendChild(fiber.dom);
+    } else if (fiber.effectTag === "UPDATE" && fiber.dom != null) {
+        updateDom(fiber.dom, fiber.alternate.props, fiber.props);
+    }
+    if (fiber.effectTag === "DELETION" && fiber.dom != null) {
+        domParent.removeChild(fiber.dom);
+    }
+    commitWork(fiber.child);
+    commitWork(fiber.sibling);
 }
 
 function workLoop(deadline) {
-    // deadline is param passed by requestIdleCallback
     let shouldYield = false;
     while (nextUnitOfWork && !shouldYield) {
-        // it runs for first time, then checks time remaining for upcoming iterations
         nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
         shouldYield = deadline.timeRemaining() < 1;
     }
@@ -74,16 +120,13 @@ function workLoop(deadline) {
 requestIdleCallback(workLoop);
 
 function performUnitOfWork(fiber) {
-    // 1. create dom
     if (!fiber.dom) {
         fiber.dom = createDom(fiber);
     }
 
-    // 2. each children handle linking
     const children = fiber.props.children;
     reconcileChildren(fiber, children);
 
-    // 3. return next task
     if (fiber.child) {
         return fiber.child;
     }
@@ -96,25 +139,55 @@ function performUnitOfWork(fiber) {
     }
 }
 
-function reconcileChildren(fiber, children) {
+function reconcileChildren(parentFiber, children) {
     let idx = 0;
+    let oldFiber = parentFiber.alternate && parentFiber.alternate.child;
     let prevSibling = null;
-    while (idx < children.length) {
-        const child = children[idx];
-        const childFiber = {
-            type: child.type,
-            props: child.props,
-            parent: fiber,
-            dom: null,
-        };
 
-        if (idx === 0) {
-            fiber.child = childFiber;
-        } else {
-            prevSibling.sibling = childFiber;
+    while (idx < children.length || oldFiber != null) {
+        const child = children[idx];
+        let newFiber = null;
+
+        const sameType = oldFiber && child && child.type == oldFiber.type;
+
+        if (sameType) {
+            newFiber = {
+                type: oldFiber.type,
+                props: child.props,
+                dom: oldFiber.dom,
+                parent: parentFiber,
+                alternate: oldFiber,
+                effectTag: "UPDATE",
+            };
         }
 
-        prevSibling = childFiber;
+        if (child && !sameType) {
+            newFiber = {
+                type: child.type,
+                props: child.props,
+                dom: null,
+                parent: parentFiber,
+                alternate: null,
+                effectTag: "PLACEMENT",
+            };
+        }
+
+        if (oldFiber && !sameType) {
+            oldFiber.effectTag = "DELETION";
+            deletions.push(oldFiber);
+        }
+
+        if (oldFiber) {
+            oldFiber = oldFiber.sibling;
+        }
+
+        if (idx === 0) {
+            parentFiber.child = newFiber;
+        } else {
+            prevSibling.sibling = newFiber;
+        }
+
+        prevSibling = newFiber;
         idx++;
     }
 }
