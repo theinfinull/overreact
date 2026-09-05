@@ -81,6 +81,7 @@ export function render(element, container) {
 function commitRoot() {
     state.deletions.forEach(commitWork);
     commitWork(state.wipRoot.child);
+    commitEffects(state.wipRoot);
     state.currentRoot = state.wipRoot;
     state.wipRoot = null;
 }
@@ -108,7 +109,27 @@ function commitWork(fiber) {
     commitWork(fiber.sibling);
 }
 
+function commitEffects(fiber) {
+    if (!fiber) return;
+
+    fiber.hooks?.forEach((hook) => {
+        if (hook.tag !== "effect" || !hook.changed) return;
+        if (typeof hook.cleanup === "function") hook.cleanup();
+        const next = hook.effect();
+        hook.cleanup = typeof next === "function" ? next : undefined;
+    });
+
+    commitEffects(fiber.child);
+    commitEffects(fiber.sibling);
+}
+
 function commitDeletion(fiber, domParent) {
+    fiber.hooks?.forEach((hook) => {
+        if (hook.tag === "effect" && typeof hook.cleanup === "function") {
+            hook.cleanup();
+        }
+    });
+
     if (fiber.dom) {
         domParent.removeChild(fiber.dom);
     } else {
