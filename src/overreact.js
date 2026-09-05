@@ -91,17 +91,32 @@ function commitWork(fiber) {
     if (!fiber) {
         return;
     }
-    const domParent = fiber.parent.dom;
+
+    // as functions components don't have dom, we need to find it's nearest parent with dom
+    let domParentFiber = fiber.parent;
+    while (!domParentFiber.dom) {
+        domParentFiber = domParentFiber.parent;
+    }
+    const domParent = domParentFiber.dom;
+
     if (fiber.effectTag === "PLACEMENT" && fiber.dom != null) {
         domParent.appendChild(fiber.dom);
     } else if (fiber.effectTag === "UPDATE" && fiber.dom != null) {
         updateDom(fiber.dom, fiber.alternate.props, fiber.props);
     }
-    if (fiber.effectTag === "DELETION" && fiber.dom != null) {
-        domParent.removeChild(fiber.dom);
+    if (fiber.effectTag === "DELETION") {
+        commitDeletion(fiber, domParent);
     }
     commitWork(fiber.child);
     commitWork(fiber.sibling);
+}
+
+function commitDeletion(fiber, domParent) {
+    if (fiber.dom) {
+        domParent.removeChild(fiber.dom);
+    } else {
+        commitDeletion(fiber.child, domParent);
+    }
 }
 
 function workLoop(deadline) {
@@ -120,12 +135,12 @@ function workLoop(deadline) {
 requestIdleCallback(workLoop);
 
 function performUnitOfWork(fiber) {
-    if (!fiber.dom) {
-        fiber.dom = createDom(fiber);
+    const isFunctionComponent = fiber.type instanceof Function;
+    if (isFunctionComponent) {
+        updateFunctionComponent(fiber);
+    } else {
+        updateHostComponent(fiber);
     }
-
-    const children = fiber.props.children;
-    reconcileChildren(fiber, children);
 
     if (fiber.child) {
         return fiber.child;
@@ -137,6 +152,21 @@ function performUnitOfWork(fiber) {
         }
         nextFiber = nextFiber.parent;
     }
+}
+
+function updateFunctionComponent(fiber) {
+    // in a function component, children come from running the function instead of getting them directly from the props
+    const children = [fiber.type(fiber.props)];
+    reconcileChildren(fiber, children);
+}
+
+function updateHostComponent(fiber) {
+    if (!fiber.dom) {
+        fiber.dom = createDom(fiber);
+    }
+
+    const children = fiber.props.children;
+    reconcileChildren(fiber, children);
 }
 
 function reconcileChildren(parentFiber, children) {
@@ -191,5 +221,9 @@ function reconcileChildren(parentFiber, children) {
         idx++;
     }
 }
+
+// makes oveereact globally accessible, so each .jsx component can access it
+const overreact = { createElement, render };
+globalThis.overreact = overreact;
 
 export { createElement, render };

@@ -16,15 +16,16 @@ DIY React built from Rodrigo Pombo's legendary guide - [Build your own React](ht
 
 ```text
 overreact/
-├── index.html              - Points at ./dist/main.js
+├── index.html
 ├── babel.config.json       - Configures JSX to compile using the overreact library
 ├── src/
 │   ├── overreact.js        - The overreact library runtime implementation
-│   └── main.jsx            - Demo app written on top of overreact
+│   ├── main.jsx
+│   └── components/
 └── dist/                   - Babel output directory containing the transpiled JS
 ```
 
-Babel dumps transpiled .jsx/js from `src/` into `dist/`.
+Babel dumps transpiled .jsx files from `src/` into `dist/` as .js.
 
 ## Commands
 
