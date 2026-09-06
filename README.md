@@ -4,7 +4,9 @@
 
 # Overreact
 
-DIY React built from Rodrigo Pombo's legendary guide - [Build your own React](https://pomb.us/build-your-own-react/).
+A lightweight implementation of React's core. Got tired of 'React will handle this', so I went and built my own version to see what's really going on under the hood.
+
+Small enough to read in an afternoon, real enough to actually work.
 
 ## Requirements
 
@@ -20,13 +22,7 @@ overreact/
 ├── src/
 │   ├── main.jsx                - demo entry
 │   ├── components/
-│   └── overreact/              - the library
-│       ├── index.js            - public API
-│       ├── element.js          - createElement + children normalisation
-│       ├── reconcile.js        - child diffing, keys, effect tags
-│       ├── renderer.js         - fiber work loop + commit
-│       ├── dom.js              - dom node creation and prop updates
-│       └── hooks.js            - useState, useEffect
+│   └── overreact/              - the overreact library
 ```
 
 Vite compiles JSX to `createElement(...)` and auto-imports it into every `.jsx`
@@ -41,3 +37,7 @@ npm run build     # production bundle into dist/
 npm run preview   # serve the production bundle
 npm run lint      # oxlint
 ```
+
+## Acknowledgements
+
+❤️ Special thanks to [Didact](https://github.com/hexacta/didact) by [@pomper](https://x.com/pomber). This project is an extension of the excellent foundation provided by the course.
