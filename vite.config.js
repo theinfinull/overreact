@@ -1,8 +1,8 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
-    // JSX compiles to `createElement(...)`, auto-imported into .jsx files only —
-    // overreact's own .js sources must stay out of it, or they'd import themselves.
+    // auto import overreact's createElement in .jsx files (overreact's .js are excluded)
+    // point jsxFactory to use overreact's createElement for JSX parsing
     esbuild: {
         include: /\.jsx$/,
         jsxFactory: "createElement",
