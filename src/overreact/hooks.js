@@ -8,7 +8,10 @@ export function useState(initialState) {
     };
 
     for (const action of previous?.queue ?? []) {
-        hook.state = typeof action === "function" ? action(hook.state) : action;
+        hook.state =
+            typeof action === "function"
+                ? action(hook.state) // when passed a function i.e. setState((curr) => curr + 1);
+                : action; // when passed a value i.e. setState(curr + 1);
     }
 
     const setState = (action) => {
@@ -45,13 +48,13 @@ function runCleanup(hook) {
 }
 
 function depsChanged(previousDeps, nextDeps) {
-    // A missing deps array means "no opinion", so the effect runs every commit.
+    // a missing deps array means "no opinion", so the effect runs every commit.
     if (!previousDeps || !nextDeps) return true;
 
     return previousDeps.length !== nextDeps.length || nextDeps.some((dep, index) => dep !== previousDeps[index]);
 }
 
-/** The hook recorded at this position on the previous render, if any. */
+/** hook recorded at this position on the previous render, if any. */
 function previousHook() {
     const fiber = renderingFiber();
     return fiber.alternate?.hooks?.[fiber.hooks.length] ?? null;
@@ -64,7 +67,7 @@ function pushHook(hook) {
 function renderingFiber() {
     const fiber = currentFiber();
     if (!fiber) {
-        throw new Error("Hooks can only be called while a component is rendering.");
+        throw new Error("hooks can only be called while a component is rendering.");
     }
     return fiber;
 }

@@ -2,11 +2,11 @@ import { createDom, updateDom } from "./dom.js";
 import { toChildElements } from "./element.js";
 import { DELETION, PLACEMENT, UPDATE, reconcileChildren } from "./reconcile.js";
 
-let currentRoot = null;
-let wipRoot = null;
+let currentRoot = null; // fiber of current root (which is redered in app)
+let wipRoot = null; // fiber of root which is being rendered
 let nextUnitOfWork = null;
 let deletions = [];
-let renderingFiber = null;
+let renderingFiber = null; // fiber which is being rendered
 let workLoopScheduled = false;
 
 export function render(element, container) {
