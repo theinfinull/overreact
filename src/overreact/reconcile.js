@@ -3,12 +3,10 @@ export const UPDATE = "UPDATE";
 export const DELETION = "DELETION";
 
 /**
- * Builds the child fibers of `parentFiber` by diffing `elements` against the
- * children of the previously rendered tree. Fibers that are no longer rendered
- * are tagged and pushed onto `deletions` for the commit phase to unmount.
+ * builds child fibers for `parentFiber` by diffing `elements` against the
+ * previous tree (`parentFiber.alternate`). unmatched fibers are tagged DELETION.
  *
- * Keyed elements are matched by key, so they survive being reordered. Unkeyed
- * elements are matched by position among the previous unkeyed children.
+ * keyed elements match by key; unkeyed elements match by position.
  */
 export function reconcileChildren(parentFiber, elements, deletions) {
     const previous = previousChildren(parentFiber);

@@ -2,9 +2,6 @@ import { createDom, updateDom } from "./dom.js";
 import { toChildElements } from "./element.js";
 import { DELETION, PLACEMENT, UPDATE, reconcileChildren } from "./reconcile.js";
 
-// Rendering is spread over idle callbacks, so the work in flight has to
-// outlive a single call: `currentRoot` is the tree on screen, `wipRoot` the one
-// being built, and `nextUnitOfWork` the fiber to pick up next.
 let currentRoot = null;
 let wipRoot = null;
 let nextUnitOfWork = null;
@@ -20,7 +17,7 @@ export function render(element, container) {
     });
 }
 
-/** Re-renders the committed tree from the root. Called by hooks after a state change. */
+/** re-renders the committed tree from the root. called by hooks after a state change. */
 export function scheduleUpdate() {
     if (!currentRoot) return;
 
@@ -31,7 +28,7 @@ export function scheduleUpdate() {
     });
 }
 
-/** The fiber whose component function is running right now, or `null`. Used by hooks. */
+/** the fiber whose component function is running right now, or `null`. used by hooks. */
 export function currentFiber() {
     return renderingFiber;
 }
@@ -56,15 +53,13 @@ function workLoop(deadline) {
         commitRoot();
     }
 
-    // Effects run during the commit may have scheduled another render. Stop
-    // asking for idle time once there is nothing left to do.
     workLoopScheduled = nextUnitOfWork !== null || wipRoot !== null;
     if (workLoopScheduled) {
         requestIdleCallback(workLoop);
     }
 }
 
-/** Renders one fiber and returns the next one: child first, then sibling, then back up. */
+/** renders one fiber and returns the next one: child first, then sibling, then back up. */
 function performUnitOfWork(fiber) {
     if (typeof fiber.type === "function") {
         updateFunctionComponent(fiber);
@@ -103,8 +98,6 @@ function commitRoot() {
     wipRoot = null;
     deletions = [];
 
-    // Effects run last so they observe the committed DOM, and after the state
-    // above is settled so an effect is free to schedule the next render.
     commitHooks(committed);
 }
 
@@ -128,7 +121,7 @@ function commitWork(fiber) {
     commitWork(fiber.sibling);
 }
 
-/** Function components own no dom, so the parent node lives further up the tree. */
+/** function components own no dom, so the parent node lives further up the tree. */
 function findDomParent(fiber) {
     let parent = fiber.parent;
     while (!parent.dom) {
@@ -137,20 +130,12 @@ function findDomParent(fiber) {
     return parent.dom;
 }
 
-/**
- * The node a freshly placed fiber has to be inserted in front of, so it lands
- * in tree order rather than at the end of its dom parent. Fibers that are
- * themselves being placed are skipped: they are not in the dom yet.
- * Returns `null` when nothing follows, which makes `insertBefore` append.
- */
 function nextMountedDom(fiber) {
     for (let current = fiber; current; current = current.parent) {
         for (let sibling = current.sibling; sibling; sibling = sibling.sibling) {
             const dom = firstMountedDom(sibling);
             if (dom) return dom;
         }
-        // Siblings of a function component share our dom parent, so keep
-        // climbing until the parent owns a dom node.
         if (current.parent?.dom) break;
     }
     return null;

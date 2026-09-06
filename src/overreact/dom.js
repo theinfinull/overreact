@@ -7,26 +7,30 @@ export function createDom(fiber) {
 }
 
 const isEventProp = (key) => key.startsWith("on");
+const isChildrenProp = (key) => key === "children";
 const eventNameOf = (key) => key.slice(2).toLowerCase();
+const isChanged = (key, prevProps, nextProps) => prevProps[key] !== nextProps[key];
 
 export function updateDom(dom, prevProps, nextProps) {
-    for (const key of Object.keys(prevProps)) {
-        if (key === "children" || prevProps[key] === nextProps[key]) continue;
+    // remove old props
+    Object.keys(prevProps)
+        .filter((key) => !isChildrenProp(key) && isChanged(key, prevProps, nextProps))
+        .forEach((key) => {
+            if (isEventProp(key)) {
+                dom.removeEventListener(eventNameOf(key), prevProps[key]);
+            } else if (!(key in nextProps)) {
+                dom[key] = "";
+            }
+        });
 
-        if (isEventProp(key)) {
-            dom.removeEventListener(eventNameOf(key), prevProps[key]);
-        } else if (!(key in nextProps)) {
-            dom[key] = "";
-        }
-    }
-
-    for (const key of Object.keys(nextProps)) {
-        if (key === "children" || prevProps[key] === nextProps[key]) continue;
-
-        if (isEventProp(key)) {
-            dom.addEventListener(eventNameOf(key), nextProps[key]);
-        } else {
-            dom[key] = nextProps[key];
-        }
-    }
+    // add new props
+    Object.keys(nextProps)
+        .filter((key) => !isChildrenProp(key) && isChanged(key, prevProps, nextProps))
+        .forEach((key) => {
+            if (isEventProp(key)) {
+                dom.addEventListener(eventNameOf(key), nextProps[key]);
+            } else {
+                dom[key] = nextProps[key];
+            }
+        });
 }

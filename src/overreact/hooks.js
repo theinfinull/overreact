@@ -1,10 +1,5 @@
 import { currentFiber, scheduleUpdate } from "./renderer.js";
 
-// Hooks are plain records kept on the fiber, in call order. A record may carry
-// two optional callbacks that let the commit phase drive it without knowing
-// what the hook does: `commit()` runs once the DOM is up to date, `unmount()`
-// runs when the fiber is removed from the tree.
-
 export function useState(initialState) {
     const previous = previousHook();
     const hook = {
