@@ -1,8 +1,3 @@
-import { createElement, render } from "./core.js";
-import { useState } from "./hooks.js";
-
-export function useOverReact() {
-    globalThis.overreact = { createElement, render, useState };
-}
-
-export { createElement, render, useState };
+export { createElement } from "./element.js";
+export { useEffect, useState } from "./hooks.js";
+export { render } from "./renderer.js";

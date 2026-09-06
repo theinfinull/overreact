@@ -1,52 +1,75 @@
-import { state } from "./core.js";
+import { currentFiber, scheduleUpdate } from "./renderer.js";
 
-export function useState(initial) {
-    const oldHook =
-        state.wipFiber.alternate && state.wipFiber.alternate.hooks && state.wipFiber.alternate.hooks[state.hookIndex];
+// Hooks are plain records kept on the fiber, in call order. A record may carry
+// two optional callbacks that let the commit phase drive it without knowing
+// what the hook does: `commit()` runs once the DOM is up to date, `unmount()`
+// runs when the fiber is removed from the tree.
+
+export function useState(initialState) {
+    const previous = previousHook();
     const hook = {
-        state: oldHook ? oldHook.state : initial,
+        state: previous ? previous.state : initialState,
         queue: [],
     };
 
-    const actions = oldHook ? oldHook.queue : [];
-    actions.forEach((action) => {
-        hook.state = action(hook.state);
-    });
+    for (const action of previous?.queue ?? []) {
+        hook.state = typeof action === "function" ? action(hook.state) : action;
+    }
 
     const setState = (action) => {
         hook.queue.push(action);
-        state.wipRoot = {
-            dom: state.currentRoot.dom,
-            props: state.currentRoot.props,
-            alternate: state.currentRoot,
-        };
-        state.nextUnitOfWork = state.wipRoot;
-        state.deletions = [];
+        scheduleUpdate();
     };
 
-    state.wipFiber.hooks.push(hook);
-    state.hookIndex++;
+    pushHook(hook);
     return [hook.state, setState];
 }
 
-function depsChanged(prev, next) {
-    if (!prev || !next) return true;
-    if (prev.length !== next.length) return true;
-    return prev.some((dep, i) => dep !== next[i]);
-}
-
 export function useEffect(effect, deps) {
-    const oldHook =
-        state.wipFiber.alternate && state.wipFiber.alternate.hooks && state.wipFiber.alternate.hooks[state.hookIndex];
-
+    const previous = previousHook();
     const hook = {
-        tag: "effect",
-        effect,
         deps,
-        cleanup: oldHook ? oldHook.cleanup : undefined,
-        changed: depsChanged(oldHook && oldHook.deps, deps),
+        cleanup: previous?.cleanup ?? null,
+        unmount: () => runCleanup(hook),
     };
 
-    state.wipFiber.hooks.push(hook);
-    state.hookIndex++;
+    if (depsChanged(previous?.deps, deps)) {
+        hook.commit = () => {
+            runCleanup(hook);
+            const cleanup = effect();
+            hook.cleanup = typeof cleanup === "function" ? cleanup : null;
+        };
+    }
+
+    pushHook(hook);
+}
+
+function runCleanup(hook) {
+    hook.cleanup?.();
+    hook.cleanup = null;
+}
+
+function depsChanged(previousDeps, nextDeps) {
+    // A missing deps array means "no opinion", so the effect runs every commit.
+    if (!previousDeps || !nextDeps) return true;
+
+    return previousDeps.length !== nextDeps.length || nextDeps.some((dep, index) => dep !== previousDeps[index]);
+}
+
+/** The hook recorded at this position on the previous render, if any. */
+function previousHook() {
+    const fiber = renderingFiber();
+    return fiber.alternate?.hooks?.[fiber.hooks.length] ?? null;
+}
+
+function pushHook(hook) {
+    renderingFiber().hooks.push(hook);
+}
+
+function renderingFiber() {
+    const fiber = currentFiber();
+    if (!fiber) {
+        throw new Error("Hooks can only be called while a component is rendering.");
+    }
+    return fiber;
 }

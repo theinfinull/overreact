@@ -8,33 +8,36 @@ DIY React built from Rodrigo Pombo's legendary guide - [Build your own React](ht
 
 ## Requirements
 
-- node + npm (to run babel)
-- static file server of some kind (`npm run dev` will do)
+- node + npm
 - any browser with `requestIdleCallback` support (which means anything but Safari)
 
 ## Layout
 
 ```text
 overreact/
-├── index.html
-├── babel.config.json
+├── index.html                  - Vite entry, loads src/main.jsx
+├── vite.config.js
 ├── src/
-│   ├── main.jsx                 - demo entry (call useOverReact once)
+│   ├── main.jsx                - demo entry
 │   ├── components/
-│   └── overreact/               - the library
-│       ├── index.js             - public API + useOverReact()
-│       ├── core.js              - elements, fibers, reconcile, commit
-│       └── hooks.js             - useState
-└── dist/                        - Babel output (browser loads this)
+│   └── overreact/              - the library
+│       ├── index.js            - public API
+│       ├── element.js          - createElement + children normalisation
+│       ├── reconcile.js        - child diffing, keys, effect tags
+│       ├── renderer.js         - fiber work loop + commit
+│       ├── dom.js              - dom node creation and prop updates
+│       └── hooks.js            - useState, useEffect
 ```
 
-Babel dumps transpiled files from `src/` into `dist/`. Call `useOverReact()` in the entry file before any JSX that expects the `overreact` global.
+Vite compiles JSX to `createElement(...)` and auto-imports it into every `.jsx`
+file, so components only import the hooks they use. See `vite.config.js`.
 
 ## Commands
 
 ```bash
 npm install
-npm run build   # src/ → dist/ (once)
-npm run watch   # src/ → dist/ on every save
-npm run dev     # watch + serve the repo root
+npm run dev       # dev server with hot reload
+npm run build     # production bundle into dist/
+npm run preview   # serve the production bundle
+npm run lint      # oxlint
 ```
