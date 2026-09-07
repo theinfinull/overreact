@@ -10,7 +10,9 @@
         "lint": "oxlint"
     },
     "devDependencies": {
+        "@tailwindcss/vite": "^4.3.3",
         "oxlint": "^1.79.0",
+        "tailwindcss": "^4.3.3",
         "vite": "^7.1.5"
     }
 }

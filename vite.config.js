@@ -1,8 +1,8 @@
 import { defineConfig } from "vite";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-    // auto import overreact's createElement in .jsx files (overreact's .js are excluded)
-    // point jsxFactory to use overreact's createElement for JSX parsing
+    plugins: [tailwindcss()],
     esbuild: {
         include: /\.jsx$/,
         jsxFactory: "createElement",
