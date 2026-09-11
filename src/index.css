@@ -1,10 +1,32 @@
-.counter {
-    display: flex;
-    gap: 2rem;
-    border: 1px solid black;
-    padding: 1rem;
-    margin: 1rem;
-    border-radius: 0.5rem;
-    max-height: 2rem;
-    align-items: center;
+@import url("https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Covered+By+Your+Grace&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Rock+Salt&family=Space+Grotesk:wght@300..700&display=swap");
+
+
+@import "tailwindcss";
+
+@font-face {
+    font-family: "Bon Vivant";
+    src: url("/fonts/BonVivant.ttf") format("truetype");
+}
+
+@theme {
+    --font-sans: "Space Grotesk", sans-serif;
+    --font-serif: "Playfair Display", serif;
+    --font-hand: "Caveat", cursive;
+    --font-grace: "Covered By Your Grace", cursive;
+    --font-rock: "Rock Salt", cursive;
+
+    /* Theme Colors */
+    --color-bg: #11110f;
+    --color-fg: #ffffff;
+}
+
+@layer base {
+    body {
+        @apply bg-bg text-fg font-sans;
+    }
+}
+
+@utility highlight-pen {
+    background-image: linear-gradient(transparent 55%, var(--color-sky-900) 55%);
+    padding-inline: 0.1em;
 }

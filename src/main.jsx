@@ -1,4 +1,4 @@
 import { render } from "./overreact";
-import App from "./components/App";
+import App from "./App.jsx";
 
-render(<App appName="Overreact" />, document.getElementById("root"));
+render(<App />, document.getElementById("root"));

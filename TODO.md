@@ -1,0 +1,1 @@
+- [ ] add a contact card with portfolio image at page bottom [contact-card](/inspirations/contactcard.jpg)
