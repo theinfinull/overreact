@@ -14,5 +14,8 @@
         "oxlint": "^1.79.0",
         "tailwindcss": "^4.3.3",
         "vite": "^7.1.5"
+    },
+    "dependencies": {
+        "lucide": "^1.45.0"
     }
 }
