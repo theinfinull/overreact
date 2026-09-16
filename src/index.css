@@ -59,3 +59,33 @@
         transform: translate3d(-50%, 0, 0);
     }
 }
+
+/* content sections */
+.prose-content p {
+    line-height: 1.8;
+}
+
+.prose-content h3 {
+    color: var(--color-light);
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+}
+
+.prose-content code {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.875em;
+    color: var(--color-accent);
+    background: color-mix(in oklab, var(--color-accent) 8%, transparent);
+    padding: 0.1em 0.3em;
+    border-radius: 0.25rem;
+}
+
+/* keep pre > code unstyled — CodeBlock handles its own look */
+.prose-content pre code {
+    background: none;
+    padding: 0;
+    color: var(--color-light2);
+    font-size: 0.875rem;
+}

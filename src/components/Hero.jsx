@@ -55,7 +55,7 @@ export default function Hero() {
 
                 {/* Quick Link Buttons */}
                 <div className="mt-8 flex flex-col text-sm sm:text-lg items-start gap-2 sm:gap-4 xs:flex-row xs:items-center md:mt-10">
-                    <a href="#story" className={`${heroBtnClass} border-light bg-light font-bold text-dark`}>
+                    <a href="#abstract" className={`${heroBtnClass} border-light bg-light font-bold text-dark`}>
                         Pop the hood
                     </a>
                     <a

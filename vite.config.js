@@ -6,6 +6,7 @@ export default defineConfig({
     esbuild: {
         include: /\.jsx$/,
         jsxFactory: "createElement",
-        jsxInject: `import { createElement } from "/src/overreact";`,
+        jsxFragment: "Fragment",
+        jsxInject: `import { createElement, Fragment } from "/src/overreact";`,
     },
 });

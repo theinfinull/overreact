@@ -96,6 +96,9 @@ export default function Footer() {
                             Github
                         </a>.
                     </p>
+                    <p className="mt-3 text-xs text-dark3">
+                        Last updated September 2026. React 19 comparisons.
+                    </p>
                 </div>
 
                 <ContactCard />

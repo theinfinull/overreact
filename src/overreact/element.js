@@ -1,5 +1,9 @@
 export const TEXT_ELEMENT = "TEXT_ELEMENT";
 
+export function Fragment({ children }) {
+    return children;
+}
+
 /** creates a virtual element (the JSX/runtime output shape). */
 export function createElement(type, config, ...children) {
     const { key = null, ...props } = config ?? {};
