@@ -43,8 +43,8 @@
 
 .section-grid {
     background-image:
-        linear-gradient(to right, color-mix(in oklab, var(--color-dark) 10%, transparent) 1px, transparent 1px),
-        linear-gradient(to bottom, color-mix(in oklab, var(--color-dark) 10%, transparent) 1px, transparent 1px);
+        linear-gradient(to right, color-mix(in oklab, var(--color-dark) 3%, transparent) 1px, transparent 1px),
+        linear-gradient(to bottom, color-mix(in oklab, var(--color-dark) 3%, transparent) 1px, transparent 1px);
     background-size: 4rem 4rem;
     mask-image: radial-gradient(ellipse 90% 82% at center, #000 40%, transparent 88%);
 }
