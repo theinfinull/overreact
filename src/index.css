@@ -37,7 +37,7 @@
 
     body {
         --page-gutter: max(0px, calc((100% - var(--max-w-page)) / 2));
-        @apply bg-dark text-light font-sans;
+        @apply bg-dark text-light font-sans font-normal;
         padding-inline: var(--page-gutter);
     }
 }

@@ -8,7 +8,7 @@ export default function Intro() {
     const currentYear = new Date().getFullYear();
     return (
         <div>
-            <Title chapter={"Zero"}>Intro</Title>
+            <Title chapter={"Zero"}>Introduction</Title>
 
             <p>Before we take a peek under the hood, let's start with the basics - What exactly is React?</p>
 

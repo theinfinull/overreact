@@ -29,17 +29,17 @@ export default function WelcomeReader() {
                         {"\n\n  "}
                         <Kw>return</Kw>
                         {
-                            ' (\n    <>\n      <img\n        src="/welcome.png"\n        alt="welcome"\n      />\n      <p>Sup {name}! grab a seat</p>\n    </>\n  );\n}'
+                            ' (\n    <>\n      <img\n        src="/welcome.png"\n        alt="welcome"\n      />\n      <p>Sup {name}! grab some wine</p>\n    </>\n  );\n}'
                         }
                     </code>
                 </pre>
             </figure>
 
             <div className="relative min-w-0 w-full overflow-hidden rounded-2xl border border-light2 sm:w-1/2">
-                <img src="/welcome-rat.png" alt="" className="block size-full object-cover object-top" />
+                <img src="/welcome-mascot.png" alt="" className="block size-full object-cover object-top" />
                 <div className="absolute inset-x-0 top-6 text-center text-hand font-black text-light [-webkit-text-stroke:0.5em_var(--color-dark)] [paint-order:stroke_fill]">
                     Sup <span className="text-purple-400">{name || "bro"}</span> !<br />
-                    grab a seat
+                    grab some wine
                 </div>
             </div>
         </div>
