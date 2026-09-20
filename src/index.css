@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Space+Grotesk:wght@300..700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Space+Grotesk:wght@300..700&display=swap");
 
 @import "tailwindcss";
 
@@ -7,6 +7,7 @@
     --font-sans: "Space Grotesk", sans-serif;
     --font-serif: "Playfair Display", serif;
     --font-hand: "Caveat", cursive;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
     /* Theme Colors */
     --color-dark: #11110f;
@@ -58,4 +59,56 @@
     to {
         transform: translate3d(-50%, 0, 0);
     }
+}
+
+/*typo*/
+.content p {
+    @apply leading-relaxed text-base mb-8 text-justify;
+}
+
+.content ul,
+.content ol {
+    @apply mb-8 space-y-8 text-base leading-relaxed;
+    list-style: none;
+}
+
+.content ul > li,
+.content ol > li {
+    position: relative;
+    padding-left: 2.75rem;
+}
+
+.content ol {
+    counter-reset: content-ol;
+}
+
+.content ol > li {
+    counter-increment: content-ol;
+}
+
+.content ol > li::before {
+    content: counter(content-ol);
+    position: absolute;
+    top: 0.05em;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.7rem;
+    height: 1.7rem;
+    background: url("/circle-marker.svg") center / contain no-repeat;
+    color: var(--color-accent);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.content ul > li::before {
+    content: "";
+    position: absolute;
+    top: 0.35em;
+    left: 0.15rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    background: url("/circle-marker.svg") center / contain no-repeat;
 }
