@@ -1,26 +1,26 @@
 import { currentFiber, scheduleUpdate } from "./renderer.js";
 
 export function useState(initialState) {
-    const previous = previousHook();
-    const hook = {
-        state: previous ? previous.state : initialState,
+    const hook = previousHook() ?? {
+        state: initialState,
         queue: [],
     };
 
-    for (const action of previous?.queue ?? []) {
+    for (const action of hook.queue) {
         hook.state =
             typeof action === "function"
                 ? action(hook.state) // when passed a function i.e. setState((curr) => curr + 1);
                 : action; // when passed a value i.e. setState(curr + 1);
     }
+    hook.queue = [];
 
-    const setState = (action) => {
+    hook.dispatch ??= (action) => {
         hook.queue.push(action);
         scheduleUpdate();
     };
 
     pushHook(hook);
-    return [hook.state, setState];
+    return [hook.state, hook.dispatch];
 }
 
 export function useEffect(effect, deps) {
