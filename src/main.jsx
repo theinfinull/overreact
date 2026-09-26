@@ -1,4 +1,7 @@
 import { render } from "./overreact";
 import App from "./App.jsx";
+import { keepScrollOnHotReload } from "./util/hmrScroll";
 
-render(<App />, document.getElementById("root"));
+const root = document.getElementById("root");
+keepScrollOnHotReload(root);
+render(<App />, root);

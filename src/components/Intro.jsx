@@ -22,7 +22,7 @@ export default function Intro() {
                 <li>
                     {" "}
                     Modularity - it lets you break UI into reusable blocks called components, bundled with their own
-                    structure and styling, yet customizable via props. JSX is the syntax that makes this bearable, it
+                    structure and styling, yet customizable via props. It's done by JSX - a syntax that
                     lets you drop dynamic JS (wrapped in {"{...}"}) right into your markup, so your UI logic and
                     structure live in one place.
                 </li>
@@ -38,7 +38,7 @@ export default function Intro() {
 
             <p>What's our goal?</p>
             <p>
-                We're going to learn how React pulls this off by building a simpler version of it ourselves, which we'll
+                We're going to learn how React does this by building a simpler version of it ourselves, which we'll
                 call <span className="font-bold">Overreact</span>. Build it step by step, picking up rendering,
                 reconciliation, hooks, and more along the way.
             </p>

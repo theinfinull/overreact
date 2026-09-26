@@ -66,6 +66,10 @@
     @apply leading-relaxed text-base mb-8 text-justify;
 }
 
+.content :not(pre) > code {
+    @apply text-violet-600 bg-violet-100 rounded px-1;
+}
+
 .content ul,
 .content ol {
     @apply mb-8 space-y-8 text-base leading-relaxed;

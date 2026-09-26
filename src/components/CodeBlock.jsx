@@ -115,7 +115,16 @@ function highlightKeywords(code) {
         }
 
         const value = match[0];
-        if (KEYWORDS.has(value)) {
+        const isComment = match[4] != null || match[5] != null;
+
+        if (isComment) {
+            flushPlain();
+            nodes.push(
+                <span key={String(keywordIndex++)} className="text-[#6A9955]">
+                    {value}
+                </span>,
+            );
+        } else if (KEYWORDS.has(value)) {
             flushPlain();
             nodes.push(
                 <span key={String(keywordIndex++)} className="text-accent">

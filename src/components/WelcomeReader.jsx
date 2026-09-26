@@ -8,7 +8,7 @@ export default function WelcomeReader() {
     const [name, setName] = useState("");
 
     return (
-        <div className="mx-auto mb-8 flex w-full max-w-85 flex-col items-center gap-3 sm:max-w-none sm:flex-row sm:items-stretch sm:gap-4">
+        <div className="mx-auto mb-10 flex w-full max-w-85 flex-col items-center gap-3 sm:max-w-none sm:flex-row sm:items-stretch sm:gap-4">
             <figure className="flex w-full min-w-0 flex-col overflow-hidden rounded-2xl bg-dark text-light sm:w-1/2">
                 <figcaption className="border-b border-dark2 px-3 py-2 font-mono text-xs tracking-wide text-light3 sm:px-4">
                     WelcomeReader.jsx
@@ -35,7 +35,7 @@ export default function WelcomeReader() {
                 </pre>
             </figure>
 
-            <div className="relative min-w-0 w-full overflow-hidden rounded-2xl border border-light2 sm:w-1/2">
+            <div className="relative min-w-0 w-full overflow-hidden rounded-2xl sm:w-1/2">
                 <img src="/welcome-mascot.png" alt="" className="block size-full object-cover object-top" />
                 <div className="absolute inset-x-0 top-6 text-center text-hand font-black text-light [-webkit-text-stroke:0.5em_var(--color-dark)] [paint-order:stroke_fill]">
                     Sup <span className="text-purple-400">{name || "bro"}</span> !<br />
