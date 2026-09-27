@@ -1,6 +1,6 @@
-export default function Title({ children, chapter }) {
+export default function Title({ children, chapter, id }) {
     return (
-        <div>
+        <div id={id} className="scroll-mt-28">
             <div className="font-hand text-dark text-xl font-semibold">
                 Chapter <span className="text-accent">{chapter}</span>
             </div>

@@ -151,11 +151,11 @@ export default function CodeBlock({ children, title, className = "" }) {
     return (
         <figure className={`mb-8 overflow-hidden rounded-2xl bg-dark text-light ${className}`.trim()}>
             {title && (
-                <figcaption className="border-b border-dark2 px-4 py-2 font-mono text-xs tracking-wide text-light3">
+                <figcaption className="border-b border-dark2 px-4 py-2 font-mono text-sm tracking-wide text-light3">
                     {title}
                 </figcaption>
             )}
-            <pre className="overflow-x-auto px-4 py-3 text-xs leading-relaxed">
+            <pre className="overflow-x-auto px-4 py-3 text-sm leading-relaxed">
                 <code className="font-mono text-light2">{highlightKeywords(codeFromChildren(children))}</code>
             </pre>
         </figure>

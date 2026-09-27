@@ -7,7 +7,7 @@ import Part1 from "./components/Part1";
 
 export default function App() {
     return (
-        <div className="min-h-svh overflow-x-hidden min-[90rem]:border-x min-[90rem]:border-dark2">
+        <div className="min-h-svh overflow-x-clip min-[90rem]:border-x min-[90rem]:border-dark2">
             <Header />
             <Hero />
 

@@ -8,7 +8,9 @@ export default function Part1() {
     return (
         <div>
             {/* Theory Stuff */}
-            <Title chapter={"One"}>Parsing & Rendering</Title>
+            <Title id="parsing-rendering" chapter={"One"}>
+                Parsing & Rendering
+            </Title>
             <WelcomeReader />
             <p>
                 This is JSX. As you can see, we've got both script and markup living in the same place. It might look
@@ -37,7 +39,7 @@ export default function Part1() {
                 that's a React element. Hand that object to <code>render</code>, and it turns into actual DOM.
             </p>
             {/* Coding Stuff */}
-            <SubTitle>1.1 Example</SubTitle>
+            <SubTitle id="swapping-out-react">Swapping Out React</SubTitle>
             <p>Let's start with a simple react app:</p>
             <CodeBlock title="main.jsx">
                 {`
@@ -75,7 +77,9 @@ export default function Part1() {
                 <code>createElement</code> and <code>render</code> that can parse and render any valid markup.
             </p>
 
-            <SubTitle>1.2 Making createElement</SubTitle>
+            <SubTitle id="create-element">
+                Implementing <code>createElement</code>
+            </SubTitle>
 
             <p>
                 The react element is a JS object with <code>type</code>, <code>props</code> and a few other fields. But
@@ -178,7 +182,66 @@ export default function Part1() {
                         `}
             </CodeBlock>
 
-            <SubTitle>1.3 Making render</SubTitle>
+            <SubTitle id="jsx-compiler">Telling Your Compiler</SubTitle>
+            <p>
+                JSX still has no idea Overreact exists. Compilers default to <code>React.createElement</code>, so{" "}
+                <code>{`<h1 title="foo">Hello</h1>`}</code> becomes a call to React unless you point them at our
+                function instead.
+            </p>
+            <p>
+                Two things matter here. The function to call (factory) and making sure that function is actually in
+                scope. Vite can inject the import for you. Babel usually wants you to import it yourself.
+            </p>
+            <p>This site uses Vite, which compiles JSX through esbuild:</p>
+            <CodeBlock title="vite.config.js">
+                {`
+                    import { defineConfig } from "vite"
+
+                    export default defineConfig({
+                        esbuild: {
+                            // the function to call
+                            jsxFactory: "createElement",
+                            // injecting createElement import
+                            jsxInject: \`import { createElement } from "/src/overreact"\`,
+                        },
+                    })
+                `}
+            </CodeBlock>
+            <p>
+                <code>jsxFactory</code> turns the markup into <code>createElement("h1", ...)</code>.{" "}
+                <code>jsxInject</code> sticks the import at the top of every JSX file, so you don't have to.
+            </p>
+            <p>On Babel, same idea with the classic JSX transform:</p>
+            <CodeBlock title="babel.config.json">
+                {`
+                    {
+                        "plugins": [
+                            ["@babel/plugin-transform-react-jsx", {
+                                // the function to call
+                                "pragma": "createElement",
+                                ...
+                            }]
+                        ]
+                    }
+                `}
+            </CodeBlock>
+            <p>
+                Babel only renames the call. Import <code>createElement</code> in the file, or drop this pragma comment
+                at the top and Babel will pick it up per file.
+            </p>
+
+            <CodeBlock title="main.jsx">
+                {`
+                    /** @jsx createElement */
+                    import { createElement } from "./overreact"
+
+                    const element = <h1 title="foo">Hello</h1>
+                `}
+            </CodeBlock>
+
+            <SubTitle id="render">
+                Implementing <code>render</code>
+            </SubTitle>
 
             <p>
                 If <code>createElement</code>'s job is turning arguments into an object, <code>render</code>'s job is
@@ -189,17 +252,14 @@ export default function Part1() {
             <CodeBlock title="render.js">
                 {`
                             function render(element, container) {
-                                const node =
-                                    element.type === "TEXT_ELEMENT"
+                                const node = element.type === "TEXT_ELEMENT"
                                         ? document.createTextNode("")
                                         : document.createElement(element.type)
 
                                 const isProperty = (key) => key !== "children"
                                 Object.keys(element.props)
                                     .filter(isProperty)
-                                    .forEach((name) => {
-                                        node[name] = element.props[name]
-                                    })
+                                    .forEach((name) => {node[name] = element.props[name]})
 
                                 element.props.children.forEach((child) => render(child, node))
 
@@ -209,15 +269,13 @@ export default function Part1() {
             </CodeBlock>
 
             <p>
-                Two things changed from our hand-rolled version: props get assigned generically instead of one at a
-                time, and children are handled recursively. Because we wrapped those leaf primitives, every child is
-                already an element - so <code>render</code> can walk them the same way. The only extra branch is
-                creating a text node when <code>type</code> is <code>TEXT_ELEMENT</code>.
+                Now props get assigned generically instead of one at a time, and children are handled recursively.
+                Because we wrapped those leaf primitives, every child is already an element - so <code>render</code> can
+                walk them the same way. The only extra branch is creating a text node when <code>type</code> is{" "}
+                <code>TEXT_ELEMENT</code>.
             </p>
 
-            <p>
-                Wire it up and you've got a tiny, working stand-in for <code>ReactDOM.render</code>:
-            </p>
+            <p>Wire it up and you've got a tiny library that can render JSX into DOM.</p>
 
             <CodeBlock title="main.jsx">
                 {`
@@ -227,6 +285,18 @@ export default function Part1() {
                             render(element, container)
                         `}
             </CodeBlock>
+
+            <p>
+                Final version{" "}
+                <a
+                    href="https://stackblitz.com/edit/overreact-chap1?file=src%2Fmain.jsx"
+                    target="_blank"
+                    className="highlight-violet-100 text-violet-600"
+                >
+                    here
+                </a>
+                !
+            </p>
         </div>
     );
 }
