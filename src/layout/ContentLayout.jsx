@@ -1,6 +1,9 @@
+import { useEffect } from "../overreact";
 import SectionNav from "../components/SectionNav";
+import { watchReveal } from "../util/reveal";
 
 export default function ContentLayout({ children }) {
+    useEffect(() => watchReveal());
     return (
         <div className="content relative min-h-screen w-full bg-light text-dark">
             <div className="section-grid pointer-events-none absolute inset-0" aria-hidden="true" />
