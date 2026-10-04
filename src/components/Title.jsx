@@ -1,6 +1,6 @@
-export default function Title({ children, chapter, id }) {
+export default function Title({ children, chapter, id, flush }) {
     return (
-        <div id={id} className="scroll-mt-28">
+        <div id={id} className={`scroll-mt-28 ${flush ? "" : "mt-24"}`}>
             <div className="font-hand text-dark text-xl font-semibold">
                 Chapter <span className="text-accent">{chapter}</span>
             </div>

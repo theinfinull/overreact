@@ -4,6 +4,7 @@ import Footer from "./components/Footer";
 import ContentLayout from "./layout/ContentLayout";
 import Intro from "./components/Intro";
 import Part1 from "./components/Part1";
+import Part2 from "./components/Part2.";
 
 export default function App() {
     return (
@@ -14,6 +15,7 @@ export default function App() {
             <ContentLayout>
                 <Intro />
                 <Part1 />
+                <Part2 />
             </ContentLayout>
 
             <Footer />

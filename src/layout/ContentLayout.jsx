@@ -12,7 +12,7 @@ export default function ContentLayout({ children }) {
                 <div id="story" className="w-full min-w-0 max-w-prose">
                     {children}
                 </div>
-                <div className="hidden w-[14.5rem] shrink-0 min-[72rem]:block" />
+                <div className="hidden w-58 shrink-0 min-[72rem]:block" />
             </div>
         </div>
     );

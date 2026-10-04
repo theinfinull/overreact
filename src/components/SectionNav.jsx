@@ -7,6 +7,10 @@ const SECTIONS = [
     { id: "create-element", label: "Implementing createElement", depth: 3 },
     { id: "jsx-compiler", label: "Telling Your Compiler", depth: 3 },
     { id: "render", label: "Implementing render", depth: 3 },
+    { id: "chunking-render", label: "Rendering In Pieces", depth: 2 },
+    { id: "fibers", label: "The Fiber Tree", depth: 3 },
+    { id: "workloop", label: "The Work Loop", depth: 3 },
+    { id: "render-v2", label: "Implementing render v2", depth: 3 },
 ];
 
 const railClass = "pointer-events-none col-start-1 row-start-1 self-start overflow-visible opacity-0";

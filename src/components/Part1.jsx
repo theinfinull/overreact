@@ -184,9 +184,9 @@ export default function Part1() {
 
             <SubTitle id="jsx-compiler">Telling Your Compiler</SubTitle>
             <p>
-                JSX still has no idea Overreact exists. Compilers default to <code>React.createElement</code>, so{" "}
-                <code>{`<h1 title="foo">Hello</h1>`}</code> becomes a call to React unless you point them at our
-                function instead.
+                JSX still has no idea Overreact's <code>createElement</code> exists. Compilers default to{" "}
+                <code>React.createElement</code>, so <code>{`<h1 title="foo">Hello</h1>`}</code> becomes a call to React
+                unless you point them at our function instead.
             </p>
             <p>
                 Two things matter here. The function to call (factory) and making sure that function is actually in

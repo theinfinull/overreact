@@ -1,6 +1,6 @@
 export default function SubTitle({ children, id }) {
     return (
-        <div id={id} className="scroll-mt-28">
+        <div id={id} className="scroll-mt-28 mt-16">
             <h1 className="text-2xl font-bold mb-8">{children}</h1>
         </div>
     );
