@@ -3,14 +3,18 @@ import { useEffect, useState } from "../overreact";
 const SECTIONS = [
     { id: "introduction", label: "Introduction", depth: 2 },
     { id: "parsing-rendering", label: "Parsing & Rendering", depth: 2 },
-    { id: "swapping-out-react", label: "Swapping Out React", depth: 3 },
-    { id: "create-element", label: "Implementing createElement", depth: 3 },
-    { id: "jsx-compiler", label: "Telling Your Compiler", depth: 3 },
+    { id: "create-element", label: "Building Elements & Wiring JSX", depth: 3 },
     { id: "render", label: "Implementing render", depth: 3 },
     { id: "chunking-render", label: "Rendering In Pieces", depth: 2 },
     { id: "fibers", label: "The Fiber Tree", depth: 3 },
-    { id: "workloop", label: "The Work Loop", depth: 3 },
-    { id: "render-v2", label: "Implementing render v2", depth: 3 },
+    { id: "workloop", label: "Scheduling & Walking The Tree", depth: 3 },
+    { id: "committing", label: "Committing The Tree", depth: 3 },
+    { id: "reconciliation", label: "Reconciliation", depth: 2 },
+    { id: "previous-tree", label: "Comparing The Trees", depth: 3 },
+    { id: "updating-dom", label: "Applying The Changes", depth: 3 },
+    { id: "functional-components", label: "Functional Components", depth: 2 },
+    { id: "hooks", label: "Hooks", depth: 2 },
+    { id: "conclusion", label: "Conclusion", depth: 2 },
 ];
 
 const railClass = "pointer-events-none col-start-1 row-start-1 self-start overflow-visible opacity-0";
@@ -21,7 +25,7 @@ export default function SectionNav() {
     useEffect(() => watchSectionNav(setActiveId), []);
 
     return (
-        <aside className="hidden w-58 shrink-0 self-stretch min-[72rem]:block">
+        <aside className="hidden w-58 shrink-0 self-stretch pb-24 min-[72rem]:block">
             <nav className="sticky top-28 z-10" aria-label="Sections" id="section-nav">
                 <p className="mb-3 ms-4.25 font-mono text-xs font-medium leading-none tracking-wider text-dark/40 uppercase">
                     Contents
@@ -38,6 +42,8 @@ export default function SectionNav() {
                             <a
                                 key={item.id}
                                 href={`#${item.id}`}
+                                onClick={scrollToSection}
+                                aria-current={activeId === item.id ? "location" : null}
                                 className={`relative block py-1.5 text-[0.8125rem] leading-snug no-underline transition-colors duration-150 ${item.depth <= 2 ? "ps-5" : "ps-7"} ${activeId === item.id ? "text-accent" : "text-dark/45 hover:text-dark"}`}
                             >
                                 {item.label}
@@ -48,6 +54,26 @@ export default function SectionNav() {
             </nav>
         </aside>
     );
+}
+
+function scrollToSection(event) {
+    // Preserve modified clicks and normal anchor behavior when a target is absent.
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const hash = event.currentTarget.hash;
+    const heading = document.getElementById(hash.slice(1));
+    if (!heading) return;
+
+    event.preventDefault();
+    if (window.location.hash !== hash) history.pushState(null, "", hash);
+    let top = 0;
+    for (let element = heading; element; element = element.offsetParent) {
+        top += element.offsetTop;
+    }
+    const margin = parseFloat(getComputedStyle(heading).scrollMarginTop) || 0;
+    window.scrollTo({
+        top: top - margin,
+        behavior: "smooth",
+    });
 }
 
 function watchSectionNav(setActiveId) {
@@ -63,6 +89,7 @@ function watchSectionNav(setActiveId) {
     const offset = 120;
     let currentId = "";
     let frame = 0;
+    let scrollFrame = 0;
     const segments = [];
 
     const depthX = (depth) => (depth <= 2 ? 8 : 16);
@@ -150,19 +177,16 @@ function watchSectionNav(setActiveId) {
         setActiveId(id);
     };
 
-    const releaseFromFooter = () => {
-        const footer = document.querySelector("footer");
-        nav.style.transform = "";
-        if (!footer) return;
-
-        const stopAt = (footer.firstElementChild ?? footer).getBoundingClientRect().top;
-        const risen = window.innerHeight - stopAt;
-        if (risen > 0) nav.style.transform = `translateY(${-risen}px)`;
-    };
-
     const sync = () => {
         activate(activeHeadingId());
-        releaseFromFooter();
+    };
+
+    const scheduleSync = () => {
+        if (scrollFrame) return;
+        scrollFrame = requestAnimationFrame(() => {
+            scrollFrame = 0;
+            sync();
+        });
     };
 
     const scheduleDraw = () => {
@@ -179,8 +203,8 @@ function watchSectionNav(setActiveId) {
     if (list) resize.observe(list);
     if (wrap) resize.observe(wrap);
 
-    window.addEventListener("scroll", sync, { passive: true });
-    window.addEventListener("hashchange", sync);
+    window.addEventListener("scroll", scheduleSync, { passive: true });
+    window.addEventListener("hashchange", scheduleSync);
 
     const start = async () => {
         if ("fonts" in document) await document.fonts.ready.catch(() => undefined);
@@ -190,8 +214,9 @@ function watchSectionNav(setActiveId) {
 
     return () => {
         cancelAnimationFrame(frame);
+        cancelAnimationFrame(scrollFrame);
         resize.disconnect();
-        window.removeEventListener("scroll", sync);
-        window.removeEventListener("hashchange", sync);
+        window.removeEventListener("scroll", scheduleSync);
+        window.removeEventListener("hashchange", scheduleSync);
     };
 }

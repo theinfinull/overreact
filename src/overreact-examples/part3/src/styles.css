@@ -1,0 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap');
+* { box-sizing: border-box; }
+body { margin: 0; padding: 40px 20px; background: #faf8ff; color: #11110f; font-family: 'Space Grotesk', sans-serif; }
+main { max-width: 640px; margin: auto; }
+h1 { font-size: clamp(2rem, 6vw, 3.5rem); line-height: 1.1; }
+input, button { font: inherit; border-radius: 12px; padding: 12px 16px; margin: 8px 8px 8px 0; }
+input { border: 1px solid #c4b5fd; background: white; max-width: 100%; }
+button { cursor: pointer; border: 0; background: #7c3aed; color: white; }
+button:focus-visible, input:focus-visible { outline: 2px solid #7c3aed; outline-offset: 4px; }
+section { margin: 24px 0; padding: 24px; border: 1px solid #ddd6fe; border-radius: 20px; background: #ede9fe; }
+label { display: block; }
+.creature { display: flex; flex-direction: column; min-width: 150px; min-height: 150px; align-items: center; justify-content: center; background: #c4b5fd; color: #11110f; border: 2px solid; box-shadow: 4px 5px #11110f; }
+.creature span { display: block; font-size: 40px; }
+footer { margin-top: 24px; color: #666; line-height: 1.6; }
+li { padding: 8px; }

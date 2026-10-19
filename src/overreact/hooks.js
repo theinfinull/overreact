@@ -1,22 +1,25 @@
 import { currentFiber, scheduleUpdate } from "./renderer.js";
 
 export function useState(initialState) {
-    const hook = previousHook() ?? {
-        state: initialState,
-        queue: [],
-    };
-
-    for (const action of hook.queue) {
-        hook.state =
+    const previous = previousHook();
+    const queue = previous?.queue ?? [];
+    const processed = queue.length;
+    let state = previous ? previous.state : typeof initialState === "function" ? initialState() : initialState;
+    for (const action of queue.slice(0, processed)) {
+        state =
             typeof action === "function"
-                ? action(hook.state) // when passed a function i.e. setState((curr) => curr + 1);
+                ? action(state) // when passed a function i.e. setState((curr) => curr + 1);
                 : action; // when passed a value i.e. setState(curr + 1);
     }
-    hook.queue = [];
-
-    hook.dispatch ??= (action) => {
-        hook.queue.push(action);
+    const dispatch = previous?.dispatch ?? ((action) => {
+        queue.push(action);
         scheduleUpdate();
+    });
+    const hook = {
+        state,
+        queue,
+        dispatch,
+        commit: () => queue.splice(0, processed),
     };
 
     pushHook(hook);
@@ -51,7 +54,7 @@ function depsChanged(previousDeps, nextDeps) {
     // a missing deps array means "no opinion", so the effect runs every commit.
     if (!previousDeps || !nextDeps) return true;
 
-    return previousDeps.length !== nextDeps.length || nextDeps.some((dep, index) => dep !== previousDeps[index]);
+    return previousDeps.length !== nextDeps.length || nextDeps.some((dep, index) => !Object.is(dep, previousDeps[index]));
 }
 
 /** hook recorded at this position on the previous render, if any. */

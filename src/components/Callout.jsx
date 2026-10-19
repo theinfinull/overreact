@@ -7,6 +7,7 @@ const tones = {
     green: "bg-green-50 text-green-500 shadow-[6px_6px_var(--color-green-500)]",
     blue: "bg-blue-50 text-blue-500 shadow-[6px_6px_var(--color-blue-500)]",
     accent: "bg-purple-50 text-accent shadow-[6px_6px_var(--color-accent)]",
+    pink: "bg-pink-50 text-pink-500 shadow-[6px_6px_var(--color-pink-500)]"
 };
 
 export default function Callout({ children, color = "accent", icon }) {

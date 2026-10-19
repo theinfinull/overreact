@@ -4,7 +4,10 @@
     "version": "0.0.0",
     "type": "module",
     "scripts": {
+        "examples": "node scripts/generate-examples.mjs",
+        "predev": "npm run examples",
         "dev": "vite",
+        "prebuild": "npm run examples",
         "build": "vite build",
         "preview": "vite preview",
         "lint": "oxlint"

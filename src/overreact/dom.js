@@ -92,6 +92,8 @@ export function updateDom(dom, prevProps, nextProps) {
             } else if (!(key in nextProps)) {
                 if (isSvgNode(dom)) {
                     dom.removeAttribute(svgAttrName(key));
+                } else if (key.startsWith("aria-") || key.startsWith("data-")) {
+                    dom.removeAttribute(key);
                 } else {
                     dom[key] = "";
                 }
@@ -106,6 +108,9 @@ export function updateDom(dom, prevProps, nextProps) {
                 dom.addEventListener(eventNameOf(key), nextProps[key]);
             } else if (isSvgNode(dom)) {
                 setSvgAttr(dom, key, nextProps[key]);
+            } else if (key.startsWith("aria-") || key.startsWith("data-")) {
+                if (nextProps[key] == null) dom.removeAttribute(key);
+                else dom.setAttribute(key, String(nextProps[key]));
             } else {
                 dom[key] = nextProps[key];
             }

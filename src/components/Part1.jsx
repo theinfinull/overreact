@@ -3,6 +3,9 @@ import Illustration from "./Illustration";
 import SubTitle from "./SubTitle";
 import Title from "./Title";
 import WelcomeReader from "./WelcomeReader";
+import Callout from "./Callout";
+import ChapterSource from "./ChapterSource";
+import { Lightbulb } from "lucide";
 
 export default function Part1() {
     return (
@@ -17,8 +20,8 @@ export default function Part1() {
                 like magic, but it's really just syntactic sugar.
             </p>
             <p>
-                The upside? Each JSX file exports a function that returns a component, and these components nest inside
-                each other to build up whole UI.
+                The upside? A component can be a function that returns elements, and those components nest inside each
+                other to build up a whole UI.
             </p>
             <Illustration
                 src="illustrations/part1-components.png"
@@ -38,8 +41,8 @@ export default function Part1() {
                 In simple terms, <code>createElement</code> takes its arguments and builds a plain object out of them -
                 that's a React element. Hand that object to <code>render</code>, and it turns into actual DOM.
             </p>
+
             {/* Coding Stuff */}
-            <SubTitle id="swapping-out-react">Swapping Out React</SubTitle>
             <p>Let's start with a simple react app:</p>
             <CodeBlock title="main.jsx">
                 {`
@@ -49,12 +52,12 @@ export default function Part1() {
                 const element = <h1 title="foo">Hello</h1>
 
                 // rendering
-                ReactDOM.render(element, container)
+                ReactDOM.createRoot(container).render(element)
             `}
             </CodeBlock>
             <p>
-                Let's swap out the HTML markup with react element object that <code>createElement</code> would return
-                and render the element ourself into actual DOM.
+                Let's swap out the JSX with the element object that <code>createElement</code> would return and render
+                the element ourselves into actual DOM.
             </p>
             <CodeBlock title="main.jsx">
                 {`
@@ -77,9 +80,7 @@ export default function Part1() {
                 <code>createElement</code> and <code>render</code> that can parse and render any valid markup.
             </p>
 
-            <SubTitle id="create-element">
-                Implementing <code>createElement</code>
-            </SubTitle>
+            <SubTitle id="create-element">Building Elements & Wiring JSX</SubTitle>
 
             <p>
                 The react element is a JS object with <code>type</code>, <code>props</code> and a few other fields. But
@@ -95,33 +96,6 @@ export default function Part1() {
                     <code>children</code> field for whatever's nested inside.
                 </li>
             </ol>
-
-            <CodeBlock title="createElement.js">
-                {`
-                            function createElement(type, props, ...children) {
-                                return {
-                                    type,
-                                    props: {
-                                        ...props,
-                                        children,
-                                    },
-                                }
-                            }
-                        `}
-            </CodeBlock>
-
-            <p>
-                That's it. Call it with the same values from earlier and you'll get back the exact same shape we built
-                by hand.
-            </p>
-
-            <CodeBlock title="main.jsx">
-                {`
-                            const element = createElement("h1", { title: "foo" }, "Hello")
-
-                            // { type: "h1", props: { title: "foo", children: ["Hello"] } }
-                        `}
-            </CodeBlock>
 
             <p>
                 There's a catch though. Not every child is a react element - <code>"Hello"</code> is just a string, and
@@ -153,9 +127,9 @@ export default function Part1() {
                                     type,
                                     props: {
                                         ...props,
-                                        children: children.map((child) =>
-                                            typeof child === "object" ? child : createTextElement(child)
-                                        ),
+                                        children: children.flat(Infinity)
+                                            .filter(child => child != null && typeof child !== "boolean")
+                                            .map(child => typeof child === "object" ? child : createTextElement(child)),
                                     },
                                 }
                             }
@@ -163,36 +137,15 @@ export default function Part1() {
             </CodeBlock>
 
             <p>
-                Now every child is an element. Call it again and <code>"Hello"</code> is no longer a bare string:
+                Arrays show up when you map a list. Null and booleans show up in conditional JSX. Flatten the arrays and
+                skip those empty children, but keep numbers - even zero is valid text.
             </p>
 
-            <CodeBlock title="main.jsx">
-                {`
-                            const element = createElement("h1", { title: "foo" }, "Hello")
-
-                            // {
-                            //   type: "h1",
-                            //   props: {
-                            //     title: "foo",
-                            //     children: [
-                            //       { type: "TEXT_ELEMENT", props: { nodeValue: "Hello", children: [] } }
-                            //     ]
-                            //   }
-                            // }
-                        `}
-            </CodeBlock>
-
-            <SubTitle id="jsx-compiler">Telling Your Compiler</SubTitle>
             <p>
-                JSX still has no idea Overreact's <code>createElement</code> exists. Compilers default to{" "}
-                <code>React.createElement</code>, so <code>{`<h1 title="foo">Hello</h1>`}</code> becomes a call to React
-                unless you point them at our function instead.
+                Now tell the JSX compiler to use our function instead of React's. We'll use the classic transform with
+                Vite 7's esbuild settings:
             </p>
-            <p>
-                Two things matter here. The function to call (factory) and making sure that function is actually in
-                scope. Vite can inject the import for you. Babel usually wants you to import it yourself.
-            </p>
-            <p>This site uses Vite, which compiles JSX through esbuild:</p>
+
             <CodeBlock title="vite.config.js">
                 {`
                     import { defineConfig } from "vite"
@@ -211,33 +164,6 @@ export default function Part1() {
                 <code>jsxFactory</code> turns the markup into <code>createElement("h1", ...)</code>.{" "}
                 <code>jsxInject</code> sticks the import at the top of every JSX file, so you don't have to.
             </p>
-            <p>On Babel, same idea with the classic JSX transform:</p>
-            <CodeBlock title="babel.config.json">
-                {`
-                    {
-                        "plugins": [
-                            ["@babel/plugin-transform-react-jsx", {
-                                // the function to call
-                                "pragma": "createElement",
-                                ...
-                            }]
-                        ]
-                    }
-                `}
-            </CodeBlock>
-            <p>
-                Babel only renames the call. Import <code>createElement</code> in the file, or drop this pragma comment
-                at the top and Babel will pick it up per file.
-            </p>
-
-            <CodeBlock title="main.jsx">
-                {`
-                    /** @jsx createElement */
-                    import { createElement } from "./overreact"
-
-                    const element = <h1 title="foo">Hello</h1>
-                `}
-            </CodeBlock>
 
             <SubTitle id="render">
                 Implementing <code>render</code>
@@ -270,12 +196,12 @@ export default function Part1() {
 
             <p>
                 Now props get assigned generically instead of one at a time, and children are handled recursively.
-                Because we wrapped those leaf primitives, every child is already an element - so <code>render</code> can
+                Because we wrapped those leaf primitives, every child is already an element, so <code>render</code> can
                 walk them the same way. The only extra branch is creating a text node when <code>type</code> is{" "}
                 <code>TEXT_ELEMENT</code>.
             </p>
 
-            <p>Wire it up and you've got a tiny library that can render JSX into DOM.</p>
+            <p>Wire 'em up, and we've got ourselves a simple renderer.</p>
 
             <CodeBlock title="main.jsx">
                 {`
@@ -287,16 +213,19 @@ export default function Part1() {
             </CodeBlock>
 
             <p>
-                Final version{" "}
-                <a
-                    href="https://stackblitz.com/edit/overreact-chap1?file=src%2Fmain.jsx"
-                    target="_blank"
-                    className="highlight-violet-100 text-violet-600"
-                >
-                    here
-                </a>
-                !
+                Now the renderer can mount any element you throw at it. But it needs some optimization and refactoring,
+                because a huge tree can cause real trouble. We'll get to that in the next chapter.
             </p>
+
+            <ChapterSource
+                eyebrow="Version One"
+                title="Source Till Now"
+                zipHref="/examples/part1.zip"
+                stackblitzHref="https://stackblitz.com/edit/overreact-chap1?file=src%2Fmain.jsx"
+            >
+                Here's the complete version of what we built till now, along with the Vite config that connects them.
+                Download it, unzip it, and run <code>npm install</code> then <code>npm run dev</code>.
+            </ChapterSource>
         </div>
     );
 }

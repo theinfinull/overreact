@@ -8,6 +8,12 @@ let nextUnitOfWork = null;
 let deletions = [];
 let renderingFiber = null; // fiber which is being rendered
 let workLoopScheduled = false;
+const requestWork = typeof globalThis.requestIdleCallback === "function"
+    ? (callback) => globalThis.requestIdleCallback(callback, { timeout: 100 })
+    : (callback) => setTimeout(() => {
+        const start = performance.now();
+        callback({ timeRemaining: () => Math.max(0, 5 - (performance.now() - start)) });
+    }, 0);
 
 export function render(element, container) {
     startRender({
@@ -40,13 +46,15 @@ function startRender(root) {
 
     if (!workLoopScheduled) {
         workLoopScheduled = true;
-        requestIdleCallback(workLoop);
+        requestWork(workLoop);
     }
 }
 
 function workLoop(deadline) {
-    while (nextUnitOfWork && deadline.timeRemaining() > 1) {
+    let performed = false;
+    while (nextUnitOfWork && (!performed || deadline.timeRemaining() > 1)) {
         nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
+        performed = true;
     }
 
     if (!nextUnitOfWork && wipRoot) {
@@ -55,7 +63,7 @@ function workLoop(deadline) {
 
     workLoopScheduled = nextUnitOfWork !== null || wipRoot !== null;
     if (workLoopScheduled) {
-        requestIdleCallback(workLoop);
+        requestWork(workLoop);
     }
 }
 

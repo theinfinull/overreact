@@ -1,0 +1,34 @@
+<svg
+    version="1.0"
+    xmlns="http://www.w3.org/2000/svg"
+    width="600.000000pt"
+    height="600.000000pt"
+    viewBox="-100 0 5370 6000"
+    preserveAspectRatio="xMidYMid meet"
+>
+<defs>
+    <!-- Bottom-to-Top Gradient Definition -->
+    <linearGradient id="bottomToTop" x1="0%" y1="100%" x2="0%" y2="0%">
+        <stop offset="0%" stop-color="#8d50ff" />  <!-- Top color -->
+        <stop offset="100%" stop-color="#bd8dff" /> <!-- Bottom color -->
+    </linearGradient>
+</defs>
+<g
+        transform="translate(0.000000,6000.000000) scale(1.000000,-1.000000)"
+        fill="url(#bottomToTop)"
+        stroke="#fff"
+        stroke-width="400"
+        stroke-linejoin="round"
+        stroke-linecap="round"
+    >
+<path
+            d="M2615 5662 c-288 -149 -486 -286 -744 -516 -152 -135 -387 -389 -529
+-570 l-23 -29 -29 34 c-16 19 -77 93 -137 166 -59 73 -111 132 -115 132 -7 1
+-180 -201 -277 -323 -577 -729 -758 -1690 -476 -2527 338 -1004 1229 -1643
+2350 -1686 333 -13 700 50 1015 174 685 270 1174 863 1324 1603 36 178 46 281
+46 476 0 193 -11 327 -41 489 -97 531 -298 930 -697 1390 -61 69 -374 384
+-392 395 -17 9 -10 15 -355 -295 -257 -231 -254 -228 -259 -213 -7 20 -327
+893 -417 1136 -43 117 -79 217 -79 222 0 21 -40 7 -165 -58z"
+        />
+</g>
+</svg>

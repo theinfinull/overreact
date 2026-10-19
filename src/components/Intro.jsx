@@ -1,11 +1,8 @@
 import { AlertCircle } from "lucide";
-import Icon from "./Icon";
-import SubTitle from "./SubTitle";
 import Title from "./Title";
 import Callout from "./Callout";
 
 export default function Intro() {
-    const currentYear = new Date().getFullYear();
     return (
         <div>
             <Title id="introduction" chapter={"Zero"} flush>
@@ -24,9 +21,9 @@ export default function Intro() {
                 <li>
                     {" "}
                     Modularity - it lets you break UI into reusable blocks called components, bundled with their own
-                    structure and styling, yet customizable via props. It's done by JSX - a syntax that
+                     structure and styling, yet customizable via props. JSX is a syntax that
                     lets you drop dynamic JS (wrapped in {"{...}"}) right into your markup, so your UI logic and
-                    structure live in one place.
+                     structure live in one place. It's handy, but optional - components work with plain JavaScript too.
                 </li>
 
                 <li>

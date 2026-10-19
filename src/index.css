@@ -56,6 +56,14 @@
     --color-light2: #e5e5e1;
     --color-light3: #c2c2bc;
     --color-accent: #a86ff7;
+    --color-accent-dark: #7a46c4;
+    --color-lcd: #c6e0a8;
+    --color-lcd-ink: #2f4a1a;
+    --color-lcd-off: #9aab86;
+    --color-gb-ink: #2c2c2a;
+    --color-gb-button: #9c2450;
+    --color-gb-button-light: #c9487a;
+    --color-gb-button-dark: #5a1230;
 
     /* Breakpoints */
     --breakpoint-xs: 480px;
@@ -67,6 +75,13 @@
     --text-hand: clamp(1.125rem, 0.375rem + 2.5vw, 1.5rem);
     --text-hand--line-height: 1.25;
     --animate-marquee: marquee 22s linear infinite;
+    --animate-breathe: breathe 1.2s steps(1, end) infinite;
+    --animate-blink: blink 4s steps(1, end) infinite;
+    --animate-shake: shake 0.26s steps(4, end);
+    --animate-pop: pop 0.3s cubic-bezier(0.3, 1.6, 0.5, 1);
+    --animate-pop-again: pop-again 0.3s cubic-bezier(0.3, 1.6, 0.5, 1);
+    --animate-rise: rise 0.6s steps(5, end) forwards;
+    --animate-rise-again: rise-again 0.6s steps(5, end) forwards;
 }
 
 @layer base {
@@ -101,6 +116,61 @@
     }
 }
 
+/* clicker sprite — whole-pixel steps so it moves like an arcade character */
+@keyframes breathe {
+    50% {
+        transform: translateY(1px);
+    }
+}
+
+@keyframes blink {
+    0%,
+    100% {
+        opacity: 0;
+    }
+    94% {
+        opacity: 1;
+    }
+}
+
+@keyframes shake {
+    25% {
+        transform: translateX(-1px);
+    }
+    75% {
+        transform: translateX(1px);
+    }
+}
+
+/* two identical keyframes: alternating between them restarts the animation on every press */
+@keyframes pop {
+    from {
+        transform: scale(0.4);
+        opacity: 0;
+    }
+}
+
+@keyframes pop-again {
+    from {
+        transform: scale(0.4);
+        opacity: 0;
+    }
+}
+
+@keyframes rise {
+    to {
+        transform: translateY(-0.75rem);
+        opacity: 0;
+    }
+}
+
+@keyframes rise-again {
+    to {
+        transform: translateY(-0.75rem);
+        opacity: 0;
+    }
+}
+
 .reveal {
     opacity: 0;
     transform: translateY(1.15rem);
@@ -116,7 +186,7 @@
 
 /*typo*/
 .content p {
-    @apply leading-relaxed text-base mb-8 text-justify;
+    @apply leading-relaxed text-base mb-8 text-left sm:text-justify;
 }
 
 .content :not(pre) > code {
@@ -168,4 +238,62 @@
     width: 1.1rem;
     height: 1.1rem;
     background: url("/circle-marker.svg") center / contain no-repeat;
+}
+
+.demo-panel {
+    @apply mb-8 rounded-2xl border border-violet-200 bg-violet-50/60 p-5 sm:p-6;
+}
+
+.demo-eyebrow {
+    @apply mb-5 font-hand text-xl text-violet-600;
+}
+
+.demo-button {
+    @apply inline-flex cursor-pointer items-center justify-center rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-violet-700 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet-600;
+}
+
+.demo-button-secondary {
+    @apply border border-violet-200 bg-white text-violet-700 hover:bg-violet-100;
+}
+
+.chapter-source p {
+    @apply mb-5 text-left text-sm;
+}
+
+.state-character {
+    @apply relative flex h-40 w-36 shrink-0 cursor-pointer flex-col items-center justify-center rounded-[2.5rem] border-2 border-dark bg-violet-300 shadow-[5px_6px_0_var(--color-dark)] transition-transform hover:-rotate-3 active:translate-y-1 active:rotate-3 focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-violet-600;
+}
+
+.character-antenna {
+    @apply absolute -top-5 h-5 w-0.5 bg-dark;
+}
+
+.character-antenna::before {
+    content: "";
+    @apply absolute -top-2 -left-1.5 size-3 rounded-full border-2 border-dark bg-yellow-300;
+}
+
+.character-eyes {
+    @apply flex gap-7;
+}
+
+.character-eyes span {
+    @apply h-5 w-3 rounded-full bg-dark;
+}
+
+.character-mouth {
+    @apply mt-1 text-3xl leading-none;
+}
+
+.character-label {
+    @apply mt-3 font-hand text-xl;
+}
+
+.character-bubble {
+    @apply relative rounded-2xl border border-violet-200 bg-white px-5 py-4 text-center font-hand text-2xl;
+}
+
+.character-bubble::before {
+    content: "";
+    @apply absolute -top-2 left-1/2 size-4 -translate-x-1/2 rotate-45 border-t border-l border-violet-200 bg-white sm:top-1/2 sm:-left-2 sm:translate-x-0 sm:-translate-y-1/2 sm:-rotate-45;
 }

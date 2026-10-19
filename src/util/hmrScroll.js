@@ -8,9 +8,8 @@ export function keepScrollOnHotReload(root) {
 
     const pin = (pos) => {
         last = pos;
-        html.style.scrollBehavior = "auto";
         html.style.minHeight = `${pos.y + innerHeight}px`;
-        window.scrollTo({ left: pos.x, top: pos.y, behavior: "auto" });
+        window.scrollTo({ left: pos.x, top: pos.y, behavior: "instant" });
     };
 
     const unpin = () => {
@@ -38,7 +37,8 @@ export function keepScrollOnHotReload(root) {
     pin(pending);
 
     const wait = () => {
-        root.firstChild ? unpin() : requestAnimationFrame(wait);
+        if (root.firstChild) unpin();
+        else requestAnimationFrame(wait);
     };
     wait();
 }

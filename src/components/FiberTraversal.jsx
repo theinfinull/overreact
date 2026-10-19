@@ -177,7 +177,7 @@ export default function FiberTraversal() {
 
                     <rect
                         id="fiber-walk-cursor"
-                        className="fill-violet-500 [transition:opacity_0.4s_ease] data-ready:[transition:transform_0.6s_cubic-bezier(0.65,0,0.35,1),opacity_0.4s_ease] data-finished:opacity-0 motion-reduce:data-ready:[transition:opacity_0.4s_ease]"
+                        className="fill-violet-500 [transition:opacity_0.4s_ease] data-ready:[transition:transform_0.6s_cubic-bezier(0.65,0,0.35,1),opacity_0.4s_ease] data-finished:opacity-0"
                         x={-NODE_W / 2}
                         y={-NODE_H / 2}
                         width={NODE_W}
@@ -236,7 +236,7 @@ export default function FiberTraversal() {
                     </div>
                 </div>
             </div>
-            <figcaption className="mt-2 text-center text-xs text-gray-500">fig 2.2 - Walking the fiber tree</figcaption>
+            <figcaption className="mt-2 text-center text-xs text-gray-500">fig 2.3 - Walking the fiber tree</figcaption>
         </figure>
     );
 }
@@ -254,18 +254,15 @@ function animateTraversal() {
     const prevButton = byId("fiber-walk-prev");
     const nextButton = byId("fiber-walk-next");
 
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let step = 0;
-    let playing = !reducedMotion;
+    let playing = true;
     let visible = false;
     let timer = 0;
 
-    const flow = reducedMotion
-        ? null
-        : trail.animate([{ strokeDashoffset: 0 }, { strokeDashoffset: -3.6 }], {
-              duration: 500,
-              iterations: Infinity,
-          });
+    const flow = trail.animate([{ strokeDashoffset: 0 }, { strokeDashoffset: -3.6 }], {
+        duration: 500,
+        iterations: Infinity,
+    });
 
     const apply = () => {
         const current = STEPS[step];
@@ -305,7 +302,7 @@ function animateTraversal() {
 
         if (caption.textContent !== current.text) {
             caption.textContent = current.text;
-            if (!reducedMotion) caption.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 350, easing: "ease-out" });
+            caption.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 350, easing: "ease-out" });
         }
         root.toggleAttribute("data-playing", playing);
     };
