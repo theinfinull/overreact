@@ -231,7 +231,7 @@ export default function Part2() {
             <ChapterSource
                 eyebrow="Version Two"
                 title="Source Till Now"
-                zipHref="/examples/part2.zip"
+                zipHref="/example/overreact-chap2.zip"
                 stackblitzHref="https://stackblitz.com/edit/overreact-chap2?file=src%2Fmain.jsx"
             >
                 Here's the complete version of what we built till now, along with the Vite config that connects them.
