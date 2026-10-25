@@ -1,7 +1,7 @@
 // Generate independent chapter snapshots and downloadable projects from the
 // same teaching source. Run before Vite so the article can import their source.
-import { mkdir, rm, writeFile } from "node:fs/promises";
-import { execFileSync } from "node:child_process";
+import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { crc32, deflateRawSync } from "node:zlib";
 import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
@@ -387,6 +387,55 @@ footer { margin-top: 24px; color: #666; line-height: 1.6; }
 li { padding: 8px; }
 `;
 
+// Build hosts don't ship a `zip` binary, so write archives with Node's zlib.
+// Sorted entries and a fixed timestamp keep the output byte-for-byte stable.
+async function listFiles(directory, path) {
+    const entries = await readdir(`${directory}/${path}`, { withFileTypes: true }).catch(() => null);
+    if (!entries) return [path];
+    const nested = await Promise.all(entries.map(entry => listFiles(directory, `${path}/${entry.name}`)));
+    return nested.flat();
+}
+
+async function zip(directory, paths) {
+    const names = (await Promise.all(paths.map(path => listFiles(directory, path)))).flat().sort();
+    const local = [];
+    const central = [];
+    let offset = 0;
+    for (const name of names) {
+        const data = await readFile(`${directory}/${name}`);
+        const packed = deflateRawSync(data);
+        const nameBytes = Buffer.from(name);
+        const header = Buffer.alloc(30);
+        header.writeUInt32LE(0x04034b50, 0);
+        header.writeUInt16LE(20, 4);
+        header.writeUInt16LE(0x0800, 6);
+        header.writeUInt16LE(8, 8);
+        header.writeUInt16LE(0, 10);
+        header.writeUInt16LE(0x21, 12);
+        header.writeUInt32LE(crc32(data), 14);
+        header.writeUInt32LE(packed.length, 18);
+        header.writeUInt32LE(data.length, 22);
+        header.writeUInt16LE(nameBytes.length, 26);
+        const entry = Buffer.alloc(46);
+        entry.writeUInt32LE(0x02014b50, 0);
+        entry.writeUInt16LE(0x0314, 4);
+        header.copy(entry, 6, 4, 28);
+        entry.writeUInt32LE((0o100644 << 16) >>> 0, 38);
+        entry.writeUInt32LE(offset, 42);
+        local.push(header, nameBytes, packed);
+        central.push(entry, nameBytes);
+        offset += header.length + nameBytes.length + packed.length;
+    }
+    const size = central.reduce((total, chunk) => total + chunk.length, 0);
+    const end = Buffer.alloc(22);
+    end.writeUInt32LE(0x06054b50, 0);
+    end.writeUInt16LE(names.length, 8);
+    end.writeUInt16LE(names.length, 10);
+    end.writeUInt32LE(size, 12);
+    end.writeUInt32LE(offset, 16);
+    return Buffer.concat([...local, ...central, end]);
+}
+
 await mkdir(output, { recursive: true });
 for (let part = 2; part <= 5; part++) {
     const directory = `${examples}/part${part}`;
@@ -410,7 +459,7 @@ for (let part = 1; part <= 5; part++) {
     const archive = `${output}/part${part}.zip`;
     // Reset existing archives so removed files cannot linger in a new download.
     await rm(archive, { force: true });
-    execFileSync("zip", ["-q", "-r", archive, "src", "package.json", "vite.config.js", "index.html",
-        ...(part === 1 ? ["public"] : [])], { cwd: directory });
+    await writeFile(archive, await zip(directory, ["src", "package.json", "vite.config.js", "index.html",
+        ...(part === 1 ? ["public"] : [])]));
 }
 console.log("Generated chapter 2–5 projects and chapter 1–5 source downloads.");
