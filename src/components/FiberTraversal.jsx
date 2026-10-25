@@ -175,20 +175,10 @@ export default function FiberTraversal() {
 
                     <path id="fiber-walk-trail" className="stroke-accent" d="" strokeWidth="1.25" {...DOTTED} />
 
-                    <rect
-                        id="fiber-walk-cursor"
-                        className="fill-violet-500 [transition:opacity_0.4s_ease] data-ready:[transition:transform_0.6s_cubic-bezier(0.65,0,0.35,1),opacity_0.4s_ease] data-finished:opacity-0"
-                        x={-NODE_W / 2}
-                        y={-NODE_H / 2}
-                        width={NODE_W}
-                        height={NODE_H}
-                        rx="8"
-                    />
-
                     {Object.entries(NODES).map(([name, node]) => (
                         <g key={name} id={`fiber-walk-node-${name}`} className="group">
                             <rect
-                                className="fill-gray-100 transition-[fill] duration-350 group-data-[state=done]:fill-violet-100 group-data-[state=current]:fill-transparent"
+                                className="fill-gray-100 transition-[fill] duration-350 group-data-[state=done]:fill-violet-100 group-data-[state=current]:fill-violet-500"
                                 x={node.x - NODE_W / 2}
                                 y={node.y - NODE_H / 2}
                                 width={NODE_W}
@@ -247,7 +237,6 @@ function animateTraversal() {
     if (!root) return undefined;
 
     const byId = (id) => document.getElementById(id);
-    const cursor = byId("fiber-walk-cursor");
     const trail = byId("fiber-walk-trail");
     const caption = byId("fiber-walk-caption");
     const playButton = byId("fiber-walk-play");
@@ -295,10 +284,6 @@ function animateTraversal() {
         if (edge?.sibling) trail.setAttribute("marker-end", "url(#fiber-walk-arrow-active)");
         else trail.removeAttribute("marker-end");
         flow?.effect.updateTiming({ direction: current.move === "parent" ? "reverse" : "normal" });
-
-        const { x, y } = NODES[current.at];
-        cursor.style.transform = `translate(${x}px, ${y}px)`;
-        cursor.toggleAttribute("data-finished", finished);
 
         if (caption.textContent !== current.text) {
             caption.textContent = current.text;
@@ -348,7 +333,6 @@ function animateTraversal() {
     observer.observe(root);
 
     apply();
-    requestAnimationFrame(() => cursor.toggleAttribute("data-ready", true));
 
     return () => {
         clearTimeout(timer);

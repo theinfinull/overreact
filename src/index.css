@@ -202,7 +202,7 @@
 .content ul > li,
 .content ol > li {
     position: relative;
-    padding-left: 2.75rem;
+    padding-left: 2.25rem;
 }
 
 .content ol {
@@ -216,15 +216,17 @@
 .content ol > li::before {
     content: counter(content-ol);
     position: absolute;
-    top: 0.05em;
+    /* centred on the first line: half the 1.625rem line minus half the box */
+    top: 0.2rem;
     left: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 1.7rem;
-    height: 1.7rem;
-    background: url("/circle-marker.svg") center / contain no-repeat;
-    color: var(--color-accent);
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 0.375rem;
+    background: color-mix(in oklab, var(--color-accent) 15%, transparent);
+    color: var(--color-accent-dark);
     font-size: 0.75rem;
     font-weight: 600;
     line-height: 1;
@@ -233,11 +235,37 @@
 .content ul > li::before {
     content: "";
     position: absolute;
-    top: 0.35em;
-    left: 0.15rem;
-    width: 1.1rem;
-    height: 1.1rem;
-    background: url("/circle-marker.svg") center / contain no-repeat;
+    top: 0.5rem;
+    left: 0.4375rem;
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 0.1875rem;
+    background: var(--color-accent);
+}
+
+/* effect lists: a diff-style sign in place of the number */
+.content ol.effect-list > li::before {
+    content: attr(data-sign);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+}
+
+.content ol.effect-list > li[data-effect="update"]::before,
+.content ol.effect-list > li[data-effect="update"] > code:first-child {
+    background: var(--color-yellow-50);
+    color: var(--color-yellow-600);
+}
+
+.content ol.effect-list > li[data-effect="placement"]::before,
+.content ol.effect-list > li[data-effect="placement"] > code:first-child {
+    background: var(--color-green-50);
+    color: var(--color-green-600);
+}
+
+.content ol.effect-list > li[data-effect="deletion"]::before,
+.content ol.effect-list > li[data-effect="deletion"] > code:first-child {
+    background: var(--color-red-50);
+    color: var(--color-red-500);
 }
 
 .demo-panel {

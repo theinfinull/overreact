@@ -6,31 +6,41 @@ import Title from "./Title";
 export default function Part4() {
     return (
         <div>
-            <Title id="functional-components" chapter="Four">Functional Components</Title>
+            <Title id="functional-components" chapter="Four">
+                Functional Components
+            </Title>
             <p>
-                Up to now, every element's type has been a tag name. But writing a whole app as one big tree gets
-                old pretty quickly. What if a piece of that tree could be a function? Give it props, let it return
-                elements, and use it wherever we'd use a tag. That's a function component.
+                Up to now, every element's type has been a tag name. But writing a whole app as one big tree gets clumsy
+                pretty quickly. What if a piece of that tree could be a function? Give it props, let it return elements,
+                and use it wherever we'd use a tag. That's a function component.
             </p>
-            <CodeBlock title="main.jsx">{`
-                function Greeting({ name }) {
-                    return <h1>Hey, {name}!</h1>
+            <CodeBlock title="ProfileCard.jsx">{`
+                function ProfileCard({ name, role, image }) {
+                    return (
+                        <div classname="profile-card">
+                            <img src={image}} />
+                            <h2>{name}</h2>
+                            <p>{role}</p>
+                        </div>
+                    );
                 }
 
-                const element = <Greeting name="Byte" />
-                // createElement(Greeting, { name: "Byte" })
+                // usage
+                <ProfileCard name="Broski" role="Software Dev" image="profile.jpg" />
             `}</CodeBlock>
             <p>
-                Capitalization tells the JSX compiler whether we mean a variable or a literal tag name.
-                <code>Greeting</code> becomes the function itself; <code>h1</code> becomes the string "h1".
-                Our createElement already stores whatever type it receives, so that part needs no special trick.
+                Capitalization tells the JSX compiler what you mean. <code>ProfileCard</code> compiles to the function
+                itself. Lowercase tags like <code>img</code> and <code>h2</code> compile to the strings{" "}
+                <code>"img"</code> and <code>"h2"</code>. Our <code>createElement</code> stores whatever type it
+                receives, so it needs no special trick.
             </p>
+
             <FunctionComponentDemo />
 
             <p>
-                A function component doesn't create a DOM node of its own. Its job is to describe children.
-                So split our unit of work into two paths: call functions to get their elements, and create DOM
-                nodes for host elements (the browser tags and text nodes).
+                A function component has no DOM node of its own. It only describes its children. So the unit of work now
+                splits into two paths. Function components get called to produce their elements. Host elements, meaning
+                browser tags and text nodes, get a real DOM node.
             </p>
             <CodeBlock title="performUnitOfWork.js">{`
                 function performUnitOfWork(fiber) {
@@ -54,15 +64,15 @@ export default function Part4() {
                 }
             `}</CodeBlock>
             <p>
-                <code>toChildElements</code> is our flatten, filter, and text-wrap logic from Chapter One,
-                pulled into a helper. Using it on the result lets a component return an element, an array,
-                text, or null. Null simply means there's nothing to show this time.
+                <code>toChildElements</code> is our flatten, filter, and text-wrap logic from Chapter One, pulled into a
+                helper. Using it on the result lets a component return an element, an array, text, or null. Null simply
+                means there's nothing to show this time.
             </p>
 
             <p>
                 Here's the catch. Our old commit code assumes every parent fiber has a DOM node. But in
-                <code>{"<div><Greeting /></div>"}</code>, the h1's parent fiber is Greeting, not div.
-                We need to walk upward until we reach an actual DOM parent.
+                <code>{"<div><ProfileCard /></div>"}</code>, the <code>{`<div classname="profile-card">`}</code>'s
+                parent fiber is ProfileCard, not div. We need to walk upward until we reach an actual DOM parent.
             </p>
             <CodeBlock title="commit.js">{`
                 function findDomParent(fiber) {
@@ -79,33 +89,31 @@ export default function Part4() {
                 }
             `}</CodeBlock>
             <p>
-                Deletion needs the same care in the other direction. Removing Greeting can't remove
-                <code>Greeting.dom</code> - it doesn't exist. Walk down until you find DOM nodes and remove
-                those instead. If a component returns several host children, remove all of them.
+                Deletion needs the same care in the other direction. Removing <code>ProfileCard</code> can't remove
+                <code>ProfileCard.dom</code> as it doesn't exist. Walk down until you find DOM nodes and remove those
+                instead. If a component returns several host children, remove all of them.
             </p>
 
             <p>
-                Our insertion helper also looks through DOM-less sibling fibers to find the next mounted node.
-                The full version below includes that walk. No wrapper divs needed just to make the renderer happy.
+                Our insertion helper also looks through DOM-less sibling fibers to find the next mounted node. The full
+                version below includes that walk. No wrapper divs needed just to make the renderer happy.
             </p>
 
             <p>
-                The same function at the same matched position keeps its identity, even with new props.
-                Define components outside other components: a fresh function created during every render looks
-                like a replacement. We'll use that identity to preserve state next.
+                When we render again, React checks each spot in the tree. If the same function is still in the same
+                spot, React treats it as the same component and only updates its props. If the function is different,
+                React throws the old component away and builds a new one. In the next chapter, we'll rely on this to
+                keep a component's state between renders.
             </p>
 
-            <p>
-                We've got reusable pieces now. But a plain local variable won't survive calling a function again.
-                To give a component memory, we'll need somewhere outside that function call to keep its state.
-                Conveniently, we already have that somewhere: its fiber.
-            </p>
+            <p>So now we have reusable pieces. Next, we'll give them memory with state.</p>
             <ChapterSource
-                eyebrow="Chapter Four source"
-                title="Chapter Four — final version"
-                zipHref="/examples/part4.zip"
+                eyebrow="Version Four"
+                title="Source Till Now"
+                zipHref="/example/overreact-chap4.zip"
+                stackblitzHref="https://stackblitz.com/edit/overreact-chap4?file=src%2Fmain.jsx"
             >
-                Here's the complete project at this stopping point. Download it, unzip it, and run 
+                Here's the complete project at this stopping point. Download it, unzip it, and run
                 <code>npm install</code> then <code>npm run dev</code>.
             </ChapterSource>
         </div>
