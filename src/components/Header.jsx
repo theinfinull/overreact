@@ -24,7 +24,7 @@ export default function Header() {
         <header id="top" className="fixed top-0 left-(--page-gutter) right-(--page-gutter) z-50">
             {/* backdrop blur */}
             <div className="pointer-events-none absolute inset-x-0 top-0 -z-1 h-22 origin-top" aria-hidden="true">
-                <div className="relative z-0 h-full w-full">
+                <div className="header-blur relative z-0 h-full w-full">
                     {BLUR_STEPS.map((step) => (
                         <div key={step} className={`absolute inset-0 mask-no-repeat mask-size-[100%_100%] ${step}`} />
                     ))}

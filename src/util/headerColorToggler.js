@@ -2,9 +2,17 @@ const probe = document.createElement("canvas").getContext("2d", { willReadFreque
 probe.canvas.width = 1;
 probe.canvas.height = 1;
 
+const luminanceCache = new Map();
+
 function luminance(color) {
     if (!color || color === "transparent") return null;
+    if (luminanceCache.has(color)) return luminanceCache.get(color);
+    const value = measureLuminance(color);
+    luminanceCache.set(color, value);
+    return value;
+}
 
+function measureLuminance(color) {
     probe.clearRect(0, 0, 1, 1);
     probe.fillStyle = color;
     probe.fillRect(0, 0, 1, 1);
@@ -24,13 +32,13 @@ function syncNavTitleColor(header, title) {
     const x = Math.min(window.innerWidth - 1, Math.max(0, rect.left + rect.width / 2));
     const y = Math.min(window.innerHeight - 1, Math.max(0, rect.top + rect.height / 2));
 
-    header.style.visibility = "hidden";
+    // skip the header's own nodes rather than hiding it: toggling visibility every scroll
+    // frame forces a restyle and repaints the header's backdrop blurs
     const stack = document.elementsFromPoint(x, y);
-    header.style.visibility = "";
 
     let onLight = false;
     for (const node of stack) {
-        if (!(node instanceof Element)) continue;
+        if (!(node instanceof Element) || header.contains(node)) continue;
         const lum = luminance(getComputedStyle(node).backgroundColor);
         if (lum == null) continue;
         onLight = lum > 0.55;

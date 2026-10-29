@@ -79,12 +79,31 @@
     }
 }
 
+/* the fade is painted in the section's own bg colour instead of a mask-image:
+   a mask over a page-tall element makes Firefox checkerboard on fast scrolls */
 .section-grid {
     background-image:
+        radial-gradient(ellipse 90% 82% at center, transparent 40%, var(--color-light) 88%),
         linear-gradient(to right, color-mix(in oklab, var(--color-dark) 3%, transparent) 1px, transparent 1px),
         linear-gradient(to bottom, color-mix(in oklab, var(--color-dark) 3%, transparent) 1px, transparent 1px);
-    background-size: 4rem 4rem;
-    mask-image: radial-gradient(ellipse 90% 82% at center, #000 40%, transparent 88%);
+    background-size:
+        100% 100%,
+        4rem 4rem,
+        4rem 4rem;
+    background-repeat: no-repeat, repeat, repeat;
+}
+
+/* Firefox re-runs every backdrop-filter each scroll frame; the 8-step progressive blur
+   stalls painting there, so it gets a single masked blur instead */
+@supports (-moz-appearance: none) {
+    .header-blur > :not(:first-child) {
+        display: none;
+    }
+
+    .header-blur > :first-child {
+        backdrop-filter: blur(12px);
+        mask-image: linear-gradient(to bottom, #000 25%, transparent 100%);
+    }
 }
 
 @utility highlight-* {
