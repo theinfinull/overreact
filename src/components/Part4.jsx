@@ -17,8 +17,8 @@ export default function Part4() {
             <CodeBlock title="ProfileCard.jsx">{`
                 function ProfileCard({ name, role, image }) {
                     return (
-                        <div classname="profile-card">
-                            <img src={image}} />
+                        <div className="profile-card">
+                            <img src={image} />
                             <h2>{name}</h2>
                             <p>{role}</p>
                         </div>
@@ -70,8 +70,8 @@ export default function Part4() {
             </p>
 
             <p>
-                Here's the catch. Our old commit code assumes every parent fiber has a DOM node. But in
-                <code>{"<div><ProfileCard /></div>"}</code>, the <code>{`<div classname="profile-card">`}</code>'s
+                Here's the catch. Our old commit code assumes every parent fiber has a DOM node. But in{" "}
+                <code>{"<div><ProfileCard /></div>"}</code>, the <code>{`<div className="profile-card">`}</code>'s
                 parent fiber is ProfileCard, not div. We need to walk upward until we reach an actual DOM parent.
             </p>
             <CodeBlock title="commit.js">{`
@@ -89,7 +89,7 @@ export default function Part4() {
                 }
             `}</CodeBlock>
             <p>
-                Deletion needs the same care in the other direction. Removing <code>ProfileCard</code> can't remove
+                Deletion needs the same care in the other direction. Removing <code>ProfileCard</code> can't remove{" "}
                 <code>ProfileCard.dom</code> as it doesn't exist. Walk down until you find DOM nodes and remove those
                 instead. If a component returns several host children, remove all of them.
             </p>
@@ -113,7 +113,7 @@ export default function Part4() {
                 zipHref="/example/overreact-chap4.zip"
                 stackblitzHref="https://stackblitz.com/edit/overreact-chap4?file=src%2Fmain.jsx"
             >
-                Here's the complete project at this stopping point. Download it, unzip it, and run
+                Here's the complete project at this stopping point. Download it, unzip it, and run{" "}
                 <code>npm install</code> then <code>npm run dev</code>.
             </ChapterSource>
         </div>

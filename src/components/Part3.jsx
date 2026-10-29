@@ -115,13 +115,13 @@ export default function Part3() {
             </p>
 
             <p>
-                New nodes go through the same path. createDom calls <code>updateDom(dom, {"{}"}, fiber.props)</code>,
+                New nodes go through the same path. <code>createDom</code> calls <code>updateDom(dom, {"{}"}, fiber.props)</code>,
                 and empty previous props mean everything counts as new.
             </p>
 
             <p>
-                The commit phase then carries out the plan. <code>deletions.forEach(commitWork)</code> runs first, then
-                <code>commitWork(wipRoot.child)</code>. A new node gets inserted before the next already-mounted sibling
+                The commit phase then carries out the plan. <code>deletions.forEach(commitWork)</code> runs first, then{" "}
+                <code>commitWork(wipRoot.child)</code>, and <code>wipRoot</code> becomes <code>currentRoot</code>. A new node gets inserted before the next already-mounted sibling
                 when there is one. Plain appending would put a replacement in the wrong spot whenever it isn’t the last
                 child.
             </p>
@@ -145,8 +145,8 @@ export default function Part3() {
             `}</CodeBlock>
 
             <p>
-                A second render now updates the first instead of rebuilding from scratch. Next, function components,
-                They let us split our UI into reusable pieces and actually scale our code
+                A second render now updates the first instead of rebuilding from scratch. Next, function components.
+                They let us split our UI into reusable pieces and actually scale our code.
             </p>
             <ChapterSource
                 eyebrow="Version Three"
@@ -154,7 +154,7 @@ export default function Part3() {
                 zipHref="/example/overreact-chap3.zip"
                 stackblitzHref="https://stackblitz.com/edit/overreact-chap3?file=src%2Fmain.jsx"
             >
-                Here's the complete project at this stopping point. Download it, unzip it, and run
+                Here's the complete project at this stopping point. Download it, unzip it, and run{" "}
                 <code>npm install</code> then <code>npm run dev</code>.
             </ChapterSource>
         </div>

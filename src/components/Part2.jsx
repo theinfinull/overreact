@@ -80,15 +80,16 @@ export default function Part2() {
                     let nextUnitOfWork = null
 
                     function workLoop(deadline) {
-                        let shouldYield = false
-                        while (nextUnitOfWork && !shouldYield) {
-                            nextUnitOfWork = performUnitOfWork(nextUnitOfWork)
-                            shouldYield = deadline.timeRemaining() < 1
-                        }
-                        requestIdleCallback(workLoop)
-                    }
+                        scheduled = false
 
-                    requestIdleCallback(workLoop)
+                        let performed = false
+                        while (nextUnitOfWork && (!performed || deadline.timeRemaining() > 1)) {
+                            nextUnitOfWork = performUnitOfWork(nextUnitOfWork)
+                            performed = true
+                        }
+
+                        if (nextUnitOfWork) scheduleWork()
+                    }
                 `}
             </CodeBlock>
             <p>
@@ -97,13 +98,45 @@ export default function Part2() {
             </p>
             <p>
                 <code>deadline</code> is an object that <code>requestIdleCallback</code> hands to our loop. Its{" "}
-                <code>timeRemaining()</code> method tells us how much idle time the browser has left. After each unit,
-                we yield if less than 1ms remains. That helps responsiveness, but one expensive unit can still block.
+                <code>timeRemaining()</code> method tells us how much idle time the browser has left. We keep going
+                while more than 1ms remains, but always perform at least one unit per call. Otherwise a callback with no
+                time left would do nothing at all. That helps responsiveness, but one expensive unit can still block.
+            </p>
+            <p>
+                If work is left over, the loop books itself another turn. And when there's nothing to do, it stops
+                asking, instead of waking up on every idle period for no reason.
+            </p>
+            <CodeBlock title="scheduleWork.js">
+                {`
+                    let scheduled = false
+
+                    // safari has no requestIdleCallback, so fall back to setTimeout
+                    const requestWork = typeof requestIdleCallback === "function"
+                        ? (callback) => requestIdleCallback(callback, { timeout: 100 })
+                        : (callback) => setTimeout(() => {
+                            const start = performance.now()
+                            callback({ timeRemaining: () => Math.max(0, 5 - (performance.now() - start)) })
+                        }, 0)
+
+                    function scheduleWork() {
+                        if (!scheduled) {
+                            scheduled = true
+                            requestWork(workLoop)
+                        }
+                    }
+                `}
+            </CodeBlock>
+            <p>
+                <code>scheduled</code> makes sure only one loop is ever waiting in line. Safari doesn't support{" "}
+                <code>requestIdleCallback</code>, so there we fake it with a <code>setTimeout</code> and a 5ms budget.
+                And <code>timeout: 100</code> makes sure a busy browser can't put our work off forever. After 100ms, it
+                runs the callback anyway, even with no idle time left. That's the case the at-least-one-unit rule
+                covers.
             </p>
 
             <p>
                 Instead of rendering the whole tree in one recursive sweep, <code>render</code> now just sets up the
-                very first unit of work and lets the loop take it from there:
+                very first unit of work and asks for the loop to start:
             </p>
             <CodeBlock title="render.js">
                 {`
@@ -117,6 +150,7 @@ export default function Part2() {
                             },
                         }
                         nextUnitOfWork = wipRoot
+                        scheduleWork()
                     }
                 `}
             </CodeBlock>
@@ -172,6 +206,7 @@ export default function Part2() {
                             }
                             nextFiber = nextFiber.parent
                         }
+                        return null
                     }
                 `}
             </CodeBlock>

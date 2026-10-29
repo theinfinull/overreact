@@ -17,7 +17,7 @@ export default function Part5() {
                 do anything anyway. We need both memory and a way to request another render.
             </p>
             <p>
-                That's what useState gives us. The component asks for a state slot; the renderer keeps it between
+                That's what <code>useState</code> gives us. The component asks for a state slot; the renderer keeps it between
                 renders. Let's give that idea a face. Meet Byte. Byte has exactly one job: getting pressed.
             </p>
             <Counter />
@@ -34,7 +34,7 @@ export default function Part5() {
 
             <p>
                 Each function fiber gets a <code>hooks</code> array. While calling its component, we remember which
-                fiber is rendering and reset a hook index to zero. Each useState call takes the next slot. On the next
+                fiber is rendering and reset a hook index to zero. Each <code>useState</code> call takes the next slot. On the next
                 render, the same slot on the alternate fiber holds the previous state.
             </p>
             <CodeBlock title="updateFunctionComponent.js">{`
@@ -58,7 +58,7 @@ export default function Part5() {
 
             <p>
                 The setter doesn't edit this render's count. It queues an action and asks the renderer to prepare
-                another tree from currentRoot. Next time the component runs, useState applies the queued actions to the
+                another tree from <code>currentRoot</code>. Next time the component runs, <code>useState</code> applies the queued actions to the
                 previous state and returns the new value.
             </p>
             <CodeBlock title="useState.js">{`
@@ -94,8 +94,8 @@ export default function Part5() {
             </p>
 
             <p>
-                <code>scheduleUpdate</code> starts a fresh work-in-progress root from currentRoot's DOM and props, with
-                currentRoot as its alternate. That reruns components, reconciles their elements, and commits changes -
+                <code>scheduleUpdate</code> starts a fresh work-in-progress root from <code>currentRoot</code>'s DOM and props,
+                with <code>currentRoot</code> as its alternate. That reruns components, reconciles their elements, and commits changes -
                 it doesn't replace every node. The full helper is in the final source.
             </p>
 
@@ -109,11 +109,11 @@ export default function Part5() {
 
             <p>
                 State describes the UI. Sometimes a component also needs to synchronize with something outside that UI:
-                a browser event, a subscription, or document.title. Doing that during rendering is awkward - we might
+                a browser event, a subscription, or <code>document.title</code>. Doing that during rendering is awkward - we might
                 pause or abandon that work before it ever reaches the screen.
             </p>
             <p>
-                useEffect takes the next hook slot too, storing dependencies and cleanup. Compare dependencies with the
+                <code>useEffect</code> takes the next hook slot too, storing dependencies and cleanup. Compare dependencies with the
                 previous slot using <code>Object.is</code>. If they changed, record a commit callback that runs the old
                 cleanup, calls the effect, and saves its returned cleanup. Here's how we'd use it:
             </p>
@@ -148,10 +148,10 @@ export default function Part5() {
                 renderer that knows when to read it, update it, and clean it up. Byte can finally remember your pokes.
             </p>
             <ChapterSource
-                eyebrow="Chapter Five source"
-                title="Chapter Five — final version"
+                eyebrow="Version Five"
+                title="Source Till Now"
                 zipHref="/examples/part5.zip"
-                stackblitzHref="https://stackblitz.com/edit/overreact-chap5"
+                stackblitzHref="https://stackblitz.com/edit/overreact-chap5?file=src%2Fmain.jsx"
             >
                 Here's the complete project at this stopping point. Download it, unzip it, and run{" "}
                 <code>npm install</code> then <code>npm run dev</code>.
