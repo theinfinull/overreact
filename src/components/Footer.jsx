@@ -41,7 +41,7 @@ function ContactCard() {
             className="w-48 shrink-0 rounded-3xl bg-light p-1.5 transition-transform hover:scale-105 hover:-rotate-2"
         >
             <div className="overflow-hidden rounded-2xl">
-                <img src="/images/author/sedhu-madhav.jpg" alt="Sedhu Madhav" className="aspect-square size-full object-cover" />
+                <img src="/images/author/sedhu-madhav.webp" alt="Sedhu Madhav" className="aspect-square size-full object-cover" />
             </div>
 
             <div className="mt-1.5 flex items-center justify-between gap-1.5 px-0.5 pb-px">
@@ -68,9 +68,9 @@ export default function Footer() {
             <div className="absolute inset-x-0 top-0 z-10 -translate-y-1/2" aria-hidden="true">
                 <div className="relative w-[115%] ml-[-7.5%] -rotate-2 overflow-hidden py-2.5 sm:py-3 border-b-16 border-dark">
                     <img
-                        src="/images/hero/background.jpg"
+                        src="/images/hero/background-violet.webp"
                         alt=""
-                        className="pointer-events-none absolute inset-0 size-full object-cover object-[50%_8%] hue-rotate-240"
+                        className="pointer-events-none absolute inset-0 size-full object-cover object-[50%_8%]"
                     />
                     <div className="relative flex w-max animate-marquee">
                         <MarqueeTrack suffix="a" />

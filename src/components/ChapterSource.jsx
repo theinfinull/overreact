@@ -1,4 +1,4 @@
-import { Download, ExternalLink, Zap } from "lucide";
+import { Download, Zap } from "lucide";
 import Icon from "./Icon";
 
 const button =
@@ -10,7 +10,7 @@ const button =
 
 const notch = "absolute -left-3 hidden size-5.5 rounded-full border-[1.5px] border-dark bg-light sm:block";
 
-export default function ChapterSource({ eyebrow, title, children, zipHref, demoHref, stackblitzHref }) {
+export default function ChapterSource({ eyebrow, title, children, zipHref, stackblitzHref }) {
     return (
         <aside className="mb-12 flex w-full flex-col border-[1.5px] border-dark bg-light text-dark sm:flex-row">
             <div className="flex flex-1 flex-col gap-1.5 px-7 py-6">
@@ -35,17 +35,6 @@ export default function ChapterSource({ eyebrow, title, children, zipHref, demoH
                     <Icon icon={Download} size={16} />
                     Download .zip
                 </a>
-                {demoHref && (
-                    <a
-                        href={demoHref}
-                        target="_blank"
-                        rel="noreferrer"
-                        className={`${button} bg-light text-dark hover:bg-light2`}
-                    >
-                        <Icon icon={ExternalLink} size={16} />
-                        Visit Demo
-                    </a>
-                )}
                 {stackblitzHref && (
                     <a
                         href={stackblitzHref}

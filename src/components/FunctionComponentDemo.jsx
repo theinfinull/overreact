@@ -3,9 +3,9 @@ import { useEffect } from "../overreact";
 import Icon from "./Icon";
 
 const PEOPLE = [
-    { name: "Ada", role: "Manager", image: "/images/avatars/ada.png" },
-    { name: "Linus", role: "Analyst", image: "/images/avatars/linus.png" },
-    { name: "Grace", role: "Engineer", image: "/images/avatars/grace.png" },
+    { name: "Ada", role: "Manager", image: "/images/avatars/ada.webp" },
+    { name: "Linus", role: "Analyst", image: "/images/avatars/linus.webp" },
+    { name: "Grace", role: "Engineer", image: "/images/avatars/grace.webp" },
 ];
 
 // `shown` is how many cards are on screen; the newest one is the person in the code line

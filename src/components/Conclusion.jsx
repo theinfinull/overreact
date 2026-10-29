@@ -1,9 +1,7 @@
-import { GitBranch, Heart } from "lucide";
+import { Heart } from "lucide";
 import Callout from "./Callout";
-import CodeBlock from "./CodeBlock";
 import Title from "./Title";
 import Illustration from "./Illustration";
-import Icon from "./Icon";
 
 export default function Conclusion() {
     return (

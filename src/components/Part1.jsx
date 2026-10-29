@@ -3,9 +3,7 @@ import Illustration from "./Illustration";
 import SubTitle from "./SubTitle";
 import Title from "./Title";
 import WelcomeReader from "./WelcomeReader";
-import Callout from "./Callout";
 import ChapterSource from "./ChapterSource";
-import { Lightbulb } from "lucide";
 
 export default function Part1() {
     return (
@@ -24,7 +22,7 @@ export default function Part1() {
                 other to build up a whole UI.
             </p>
             <Illustration
-                src="/images/diagrams/components.png"
+                src="/images/diagrams/components.webp"
                 description="fig 1.1 - nested JSX components"
                 className="pb-4"
             ></Illustration>
@@ -33,7 +31,7 @@ export default function Part1() {
                 <code>createElement</code> function calls, passing the HTML tags, attributes, and children as arguments.
             </p>
             <Illustration
-                src="/images/diagrams/jsx-compilation.png"
+                src="/images/diagrams/jsx-compilation.webp"
                 description="fig 1.2 - JSX compilation"
                 className="pl-6"
             ></Illustration>

@@ -6,11 +6,11 @@ export default function Hero() {
         <section className="relative h-svh w-full overflow-hidden">
             {/* Background Image */}
             <img
-                src="/images/hero/background.jpg"
+                src="/images/hero/background-violet.webp"
                 alt=""
                 fetchPriority="high"
                 decoding="async"
-                className="absolute inset-0 size-full object-cover object-[85%_bottom] scale-125 translate-y-6 hue-rotate-240 xs:object-[85%_center] xs:scale-100 xs:translate-y-0"
+                className="absolute inset-0 size-full object-cover object-[85%_bottom] scale-125 translate-y-6 xs:object-[85%_center] xs:scale-100 xs:translate-y-0"
             />
 
             {/* Hero Content */}

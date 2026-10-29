@@ -19,7 +19,7 @@ function luminance(color) {
     return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
 }
 
-export function syncNavTitleColor(header, title) {
+function syncNavTitleColor(header, title) {
     const rect = title.getBoundingClientRect();
     const x = Math.min(window.innerWidth - 1, Math.max(0, rect.left + rect.width / 2));
     const y = Math.min(window.innerHeight - 1, Math.max(0, rect.top + rect.height / 2));

@@ -9,22 +9,6 @@
 }
 
 @font-face {
-    font-family: "Playfair Display";
-    font-style: normal;
-    font-weight: 400 900;
-    font-display: swap;
-    src: url("/fonts/playfair-display.woff2") format("woff2");
-}
-
-@font-face {
-    font-family: "Playfair Display";
-    font-style: italic;
-    font-weight: 400 900;
-    font-display: swap;
-    src: url("/fonts/playfair-display-italic.woff2") format("woff2");
-}
-
-@font-face {
     font-family: "Caveat";
     font-style: normal;
     font-weight: 400 700;
@@ -44,7 +28,6 @@
 @theme {
     /* Fonts */
     --font-sans: "Space Grotesk", sans-serif;
-    --font-serif: "Playfair Display", serif;
     --font-hand: "Caveat", cursive;
     --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
@@ -62,7 +45,6 @@
     --color-lcd-off: #9aab86;
     --color-gb-ink: #2c2c2a;
     --color-gb-button: #9c2450;
-    --color-gb-button-light: #c9487a;
     --color-gb-button-dark: #5a1230;
 
     /* Breakpoints */
@@ -266,62 +248,4 @@
 .content ol.effect-list > li[data-effect="deletion"] > code:first-child {
     background: var(--color-red-50);
     color: var(--color-red-500);
-}
-
-.demo-panel {
-    @apply mb-8 rounded-2xl border border-violet-200 bg-violet-50/60 p-5 sm:p-6;
-}
-
-.demo-eyebrow {
-    @apply mb-5 font-hand text-xl text-violet-600;
-}
-
-.demo-button {
-    @apply inline-flex cursor-pointer items-center justify-center rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-violet-700 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet-600;
-}
-
-.demo-button-secondary {
-    @apply border border-violet-200 bg-white text-violet-700 hover:bg-violet-100;
-}
-
-.chapter-source p {
-    @apply mb-5 text-left text-sm;
-}
-
-.state-character {
-    @apply relative flex h-40 w-36 shrink-0 cursor-pointer flex-col items-center justify-center rounded-[2.5rem] border-2 border-dark bg-violet-300 shadow-[5px_6px_0_var(--color-dark)] transition-transform hover:-rotate-3 active:translate-y-1 active:rotate-3 focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-violet-600;
-}
-
-.character-antenna {
-    @apply absolute -top-5 h-5 w-0.5 bg-dark;
-}
-
-.character-antenna::before {
-    content: "";
-    @apply absolute -top-2 -left-1.5 size-3 rounded-full border-2 border-dark bg-yellow-300;
-}
-
-.character-eyes {
-    @apply flex gap-7;
-}
-
-.character-eyes span {
-    @apply h-5 w-3 rounded-full bg-dark;
-}
-
-.character-mouth {
-    @apply mt-1 text-3xl leading-none;
-}
-
-.character-label {
-    @apply mt-3 font-hand text-xl;
-}
-
-.character-bubble {
-    @apply relative rounded-2xl border border-violet-200 bg-white px-5 py-4 text-center font-hand text-2xl;
-}
-
-.character-bubble::before {
-    content: "";
-    @apply absolute -top-2 left-1/2 size-4 -translate-x-1/2 rotate-45 border-t border-l border-violet-200 bg-white sm:top-1/2 sm:-left-2 sm:translate-x-0 sm:-translate-y-1/2 sm:-rotate-45;
 }
