@@ -20,7 +20,7 @@ export default function Part2() {
                 between them.
             </p>
             <Illustration
-                src="illustrations/part2-chunking.svg"
+                src="/images/diagrams/work-chunking.svg"
                 description="fig 2.1 - Chunking Render"
                 className="px-4"
             ></Illustration>
@@ -37,7 +37,7 @@ export default function Part2() {
                 <code>type</code> and <code>props</code>, same as before, plus three new links:
             </p>
             <Illustration
-                src="illustrations/part2-fiber.svg"
+                src="/images/diagrams/fiber-tree.svg"
                 description="fig 2.2 - Fibers"
                 className="px-4"
             ></Illustration>
@@ -266,7 +266,7 @@ export default function Part2() {
             <ChapterSource
                 eyebrow="Version Two"
                 title="Source Till Now"
-                zipHref="/example/overreact-chap2.zip"
+                zipHref="/examples/overreact-chap2.zip"
                 stackblitzHref="https://stackblitz.com/edit/overreact-chap2?file=src%2Fmain.jsx"
             >
                 Here's the complete version of what we built till now, along with the Vite config that connects them.

@@ -17,7 +17,7 @@ export default function Conclusion() {
                 cleanup. That's a lot of "React will handle it" we've just handled ourselves.
             </p>
 
-            <Illustration src="illustrations/part6-journey.svg" className="pr-3 py-4"></Illustration>
+            <Illustration src="/images/diagrams/journey-recap.svg" className="pr-3 py-4"></Illustration>
 
             <p>
                 Of course, this isn't all of React. We built a single-root renderer with a positional diff, a basic

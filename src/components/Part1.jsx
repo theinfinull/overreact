@@ -24,7 +24,7 @@ export default function Part1() {
                 other to build up a whole UI.
             </p>
             <Illustration
-                src="illustrations/part1-components.png"
+                src="/images/diagrams/components.png"
                 description="fig 1.1 - nested JSX components"
                 className="pb-4"
             ></Illustration>
@@ -33,7 +33,7 @@ export default function Part1() {
                 <code>createElement</code> function calls, passing the HTML tags, attributes, and children as arguments.
             </p>
             <Illustration
-                src="illustrations/part1-jsx-compilation.png"
+                src="/images/diagrams/jsx-compilation.png"
                 description="fig 1.2 - JSX compilation"
                 className="pl-6"
             ></Illustration>
@@ -220,7 +220,7 @@ export default function Part1() {
             <ChapterSource
                 eyebrow="Version One"
                 title="Source Till Now"
-                zipHref="/example/overreact-chap1.zip"
+                zipHref="/examples/overreact-chap1.zip"
                 stackblitzHref="https://stackblitz.com/edit/overreact-chap1?file=src%2Fmain.jsx"
             >
                 Here's the complete version of what we built till now, along with the Vite config that connects them.

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/favicon-512.png" alt="Overreact logo" width="160" />
+  <img src="public/icons/icon-512.png" alt="Overreact logo" width="160" />
 </p>
 
 # Overreact

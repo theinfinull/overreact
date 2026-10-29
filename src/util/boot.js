@@ -1,4 +1,4 @@
-const CRITICAL_IMAGES = ["/hero-background.jpg", "/hero-mascot.svg", "/overreact.svg"];
+const CRITICAL_IMAGES = ["/images/hero/background.jpg", "/images/hero/mascot.svg", "/brand/overreact-logo.svg"];
 
 function loadImage(src) {
     return new Promise((resolve) => {

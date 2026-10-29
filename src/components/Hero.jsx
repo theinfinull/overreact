@@ -6,7 +6,7 @@ export default function Hero() {
         <section className="relative h-svh w-full overflow-hidden">
             {/* Background Image */}
             <img
-                src="/hero-background.jpg"
+                src="/images/hero/background.jpg"
                 alt=""
                 fetchPriority="high"
                 decoding="async"
@@ -30,7 +30,7 @@ export default function Hero() {
                 </div>
 
                 <img
-                    src="/hero-mascot.svg"
+                    src="/images/hero/mascot.svg"
                     alt=""
                     className="-my-10 -ml-6 max-h-42 xs:pt-0 xs:-my-12 xs:-ml-10 xs:max-h-64 sm:-my-16 sm:-ml-11 sm:max-h-72 md:-my-18 md:mx-5 md:max-h-82"
                 />

@@ -110,7 +110,7 @@ export default function Part4() {
             <ChapterSource
                 eyebrow="Version Four"
                 title="Source Till Now"
-                zipHref="/example/overreact-chap4.zip"
+                zipHref="/examples/overreact-chap4.zip"
                 stackblitzHref="https://stackblitz.com/edit/overreact-chap4?file=src%2Fmain.jsx"
             >
                 Here's the complete project at this stopping point. Download it, unzip it, and run{" "}

@@ -36,7 +36,7 @@ export default function WelcomeReader() {
             </figure>
 
             <div className="relative min-w-0 w-full overflow-hidden rounded-2xl sm:w-1/2">
-                <img src="/welcome-mascot.png" alt="" className="block size-full object-cover object-top" />
+                <img src="/images/welcome/mascot.png" alt="" className="block size-full object-cover object-top" />
                 <div className="absolute inset-x-0 top-6 text-center text-hand font-black text-light [-webkit-text-stroke:0.5em_var(--color-dark)] [paint-order:stroke_fill]">
                     Sup <span className="text-purple-400">{name || "bro"}</span> !<br />
                     grab some wine

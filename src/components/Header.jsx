@@ -33,7 +33,7 @@ export default function Header() {
 
             <div className="relative m-4 px-2 xs:px-4 py-2">
                 <a href="/" className="flex shrink-0 items-center gap-1.5 font-semibold">
-                    <img src="/overreact.svg" alt="" className="size-6 shrink-0" />
+                    <img src="/brand/overreact-logo.svg" alt="" className="size-6 shrink-0" />
                     <span id="nav-title" className="text-light transition-colors duration-500">
                         Overreact
                     </span>

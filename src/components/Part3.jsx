@@ -151,7 +151,7 @@ export default function Part3() {
             <ChapterSource
                 eyebrow="Version Three"
                 title="Source Till Now"
-                zipHref="/example/overreact-chap3.zip"
+                zipHref="/examples/overreact-chap3.zip"
                 stackblitzHref="https://stackblitz.com/edit/overreact-chap3?file=src%2Fmain.jsx"
             >
                 Here's the complete project at this stopping point. Download it, unzip it, and run{" "}
