@@ -14,7 +14,7 @@ const SECTIONS = [
     { id: "updating-dom", label: "Applying The Changes", depth: 3 },
     { id: "functional-components", label: "Functional Components", depth: 2 },
     { id: "hooks", label: "Hooks", depth: 2 },
-    { id: "conclusion", label: "Conclusion", depth: 2 },
+    { id: "conclusion", label: "That's It", depth: 2 },
 ];
 
 const railClass = "pointer-events-none col-start-1 row-start-1 self-start overflow-visible opacity-0";

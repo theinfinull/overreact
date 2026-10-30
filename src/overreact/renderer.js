@@ -109,15 +109,20 @@ function commitRoot() {
     commitHooks(committed);
 }
 
-function commitWork(fiber) {
+/** `moving` is inherited from a moved dom-less ancestor: its dom descendants must move too. */
+function commitWork(fiber, moving = false) {
     if (!fiber) return;
+    const mustMove = moving || fiber.moved;
 
     switch (fiber.effectTag) {
         case PLACEMENT:
-            if (fiber.dom) findDomParent(fiber).insertBefore(fiber.dom, nextMountedDom(fiber));
+            if (fiber.dom) insertDom(fiber);
             break;
         case UPDATE:
-            if (fiber.dom) updateDom(fiber.dom, fiber.alternate.props, fiber.props);
+            if (fiber.dom) {
+                updateDom(fiber.dom, fiber.alternate.props, fiber.props);
+                if (mustMove) insertDom(fiber);
+            }
             break;
         case DELETION:
             unmountSubtree(fiber);
@@ -125,8 +130,13 @@ function commitWork(fiber) {
             return;
     }
 
-    commitWork(fiber.child);
-    commitWork(fiber.sibling);
+    // a moved dom node carries its whole subtree along, so only dom-less fibers pass the flag down
+    commitWork(fiber.child, mustMove && !fiber.dom);
+    commitWork(fiber.sibling, moving);
+}
+
+function insertDom(fiber) {
+    findDomParent(fiber).insertBefore(fiber.dom, nextMountedDom(fiber));
 }
 
 /** function components own no dom, so the parent node lives further up the tree. */
@@ -150,7 +160,8 @@ function nextMountedDom(fiber) {
 }
 
 function firstMountedDom(fiber) {
-    if (fiber.effectTag === PLACEMENT) return null;
+    // placed and moved fibers aren't at their final spot yet, so they can't be an anchor
+    if (fiber.effectTag === PLACEMENT || fiber.moved) return null;
     if (fiber.dom) return fiber.dom;
 
     for (let child = fiber.child; child; child = child.sibling) {

@@ -19,14 +19,16 @@ Small enough to read in an afternoon, real enough to actually work.
 overreact/
 ├── index.html                  - Vite entry, loads src/main.jsx
 ├── vite.config.js
+├── public/examples/            - the downloadable chapter ZIPs
 ├── src/
-│   ├── main.jsx                - demo entry
-│   ├── components/
-│   └── overreact/              - the overreact library
+│   ├── main.jsx                - site entry, renders <App /> with overreact
+│   ├── components/             - the blog: chapters (Part1-5), demos, layout pieces
+│   ├── overreact/              - the overreact library (the version this site runs on)
+│   └── overreact-versions/     - v1-v5 snapshots, one per chapter, for side-by-side comparison
 ```
 
 Vite compiles JSX to `createElement(...)` and auto-imports it into every `.jsx`
-file, so components only import the hooks they use. See `vite.config.js`.
+file, so components only import the hooks they use. See `vite.config.js`. (The chapter ZIPs use plain `jsxFactory` and import `createElement` explicitly instead.)
 
 ## Commands
 

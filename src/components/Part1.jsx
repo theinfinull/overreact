@@ -9,7 +9,7 @@ export default function Part1() {
     return (
         <div>
             {/* Theory Stuff */}
-            <Title id="parsing-rendering" chapter={"One"}>
+            <Title id="parsing-rendering" chapter="One">
                 Parsing & Rendering
             </Title>
             <WelcomeReader />
@@ -62,11 +62,11 @@ export default function Part1() {
                     const container = document.getElementById("root")
 
                     // parsing the markup
-                    const reactElement = { type: "h1", props: { title: "foo", children: "Hello" }, }
+                    const reactElement = { type: "h1", props: { title: "foo", children: "Hello" } }
 
                     // rendering
                     const node = document.createElement(reactElement.type)
-                    node["title"] = reactElement.props.title
+                    node["title"] = reactElement.props.title // props are just properties on the node
                     const text = document.createTextNode("")
                     text["nodeValue"] = reactElement.props.children
                     node.appendChild(text)
@@ -74,15 +74,20 @@ export default function Part1() {
             `}
             </CodeBlock>
             <p>
-                That's really all there is to parsing and rendering, the only job left is to make a universal{" "}
-                <code>createElement</code> and <code>render</code> that can parse and render any valid markup.
+                (React keeps a lone string child as-is, like <code>children: "Hello"</code> above. Our own{" "}
+                <code>createElement</code> will always produce an array of children, which makes walking the tree a lot
+                simpler.)
+            </p>
+            <p>
+                That's really all there is to parsing and rendering. The only job left is to make a universal{" "}
+                <code>createElement</code> and <code>render</code> that can handle any valid markup.
             </p>
 
             <SubTitle id="create-element">Building Elements & Wiring JSX</SubTitle>
 
             <p>
                 The react element is a JS object with <code>type</code>, <code>props</code> and a few other fields. But
-                we'll be only focussing on these two.{" "}
+                we'll only be focusing on these two.
             </p>
 
             <ol>
@@ -135,13 +140,15 @@ export default function Part1() {
             </CodeBlock>
 
             <p>
-                Arrays show up when you map a list. Null and booleans show up in conditional JSX. Flatten the arrays and
-                skip those empty children, but keep numbers - even zero is valid text.
+                Arrays show up when you map a list: <code>{"{items.map(...)}"}</code> hands <code>createElement</code> an
+                array inside its children, so we flatten it. Null and booleans show up in conditional JSX like{" "}
+                <code>{"{isOpen && <Menu />}"}</code>, and they render nothing, so we skip them. Numbers stay, since even
+                zero is valid text.
             </p>
 
             <p>
-                Now tell the JSX compiler to use our function instead of React's. We'll use the classic transform with
-                Vite 7's esbuild settings:
+                Now tell the JSX compiler to call our function instead of React's. We'll use the classic transform
+                through Vite 7's esbuild settings:
             </p>
 
             <CodeBlock title="vite.config.js">
@@ -150,17 +157,16 @@ export default function Part1() {
 
                     export default defineConfig({
                         esbuild: {
-                            // the function to call
+                            // compile <h1 title="foo">Hello</h1> into createElement("h1", { title: "foo" }, "Hello")
                             jsxFactory: "createElement",
-                            // injecting createElement import
-                            jsxInject: \`import { createElement } from "/src/overreact"\`,
                         },
                     })
                 `}
             </CodeBlock>
             <p>
-                <code>jsxFactory</code> turns the markup into <code>createElement("h1", ...)</code>.{" "}
-                <code>jsxInject</code> sticks the import at the top of every JSX file, so you don't have to.
+                The compiled code calls whatever <code>createElement</code> is in scope, so every file that contains JSX
+                has to import ours. (This site's own config goes one step further and auto-injects that import with{" "}
+                <code>jsxInject</code>, but explicit imports are easier to follow while we learn.)
             </p>
 
             <SubTitle id="render">
@@ -196,13 +202,16 @@ export default function Part1() {
                 Now props get assigned generically instead of one at a time, and children are handled recursively.
                 Because we wrapped those leaf primitives, every child is already an element, so <code>render</code> can
                 walk them the same way. The only extra branch is creating a text node when <code>type</code> is{" "}
-                <code>TEXT_ELEMENT</code>.
+                <code>TEXT_ELEMENT</code>. And since a text element keeps its text under <code>nodeValue</code>, the very
+                property a DOM text node expects, the same props loop fills it in with no special case.
             </p>
 
             <p>Wire 'em up, and we've got ourselves a simple renderer.</p>
 
             <CodeBlock title="main.jsx">
                 {`
+                            import { createElement, render } from "./overreact.js"
+
                             const container = document.getElementById("root")
                             const element = createElement("h1", { title: "foo" }, "Hello")
 
@@ -211,8 +220,9 @@ export default function Part1() {
             </CodeBlock>
 
             <p>
-                Now the renderer can mount any element you throw at it. But it needs some optimization and refactoring,
-                because a huge tree can cause real trouble. We'll get to that in the next chapter.
+                Now the renderer can mount any element you throw at it. But there's a catch: <code>render</code> recurses
+                through the whole tree without ever stopping, and a huge tree can freeze the page while it does. We'll
+                fix that in the next chapter.
             </p>
 
             <ChapterSource

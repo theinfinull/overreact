@@ -3,9 +3,10 @@ import { currentFiber, scheduleUpdate } from "./renderer.js";
 export function useState(initialState) {
     const previous = previousHook();
     const queue = previous?.queue ?? [];
-    const processed = queue.length;
+    // snapshot: actions queued after this point stay queued for the next render
+    const pending = queue.slice();
     let state = previous ? previous.state : typeof initialState === "function" ? initialState() : initialState;
-    for (const action of queue.slice(0, processed)) {
+    for (const action of pending) {
         state =
             typeof action === "function"
                 ? action(state) // when passed a function i.e. setState((curr) => curr + 1);
@@ -19,7 +20,8 @@ export function useState(initialState) {
         state,
         queue,
         dispatch,
-        commit: () => queue.splice(0, processed),
+        // only drop the applied actions once committed, so a restarted render can replay them
+        commit: () => queue.splice(0, pending.length),
     };
 
     pushHook(hook);

@@ -15,12 +15,17 @@ export default function Conclusion() {
                 cleanup. That's a lot of "React will handle it" we've just handled ourselves.
             </p>
 
-            <Illustration src="/images/diagrams/journey-recap.svg" className="pr-3 py-4"></Illustration>
+            <Illustration
+                src="/images/diagrams/journey-recap.svg"
+                alt="The journey so far: JSX, rendering, reconciliation, function components, hooks"
+                className="pr-3 py-4"
+            />
 
             <p>
                 Of course, this isn't all of React. We built a single-root renderer with a positional diff, a basic
-                scheduler, and two hooks. React does much more than that, and we’ve happily left it all out of this
-                afternoon’s project. Small enough to understand is the point.
+                scheduler, and two hooks. React does much more than that, such as keyed list moves, context, and
+                concurrent rendering, and we’ve happily left it all out of this afternoon’s project. Small enough to
+                understand is the point.
             </p>
 
             <Callout icon={Heart} color="pink">
@@ -37,7 +42,12 @@ export default function Conclusion() {
             </Callout>
             <p>
                 The complete overreact source code is available on{" "}
-                <a href="https://github.com/theinfinull/overreact" target="_blank" className="highlight-violet-200">
+                <a
+                    href="https://github.com/theinfinull/overreact"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="highlight-violet-200"
+                >
                     Github
                 </a>
                 , ready to tinker with. Break it, trace a render, add a hook. And next time someone says “React will

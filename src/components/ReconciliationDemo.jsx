@@ -1,6 +1,6 @@
-import { ChevronLeft, ChevronRight, Pause, Play } from "lucide";
 import { useEffect } from "../overreact";
-import Icon from "./Icon";
+import { playSteps, setDataState } from "../util/stepPlayer";
+import StepControls from "./StepControls";
 
 // aligned rows: old child, new child at the same position, and what reconcileChildren decides
 const ROWS = [
@@ -50,12 +50,6 @@ const STEPS = [
     },
 ];
 
-const TICK_MS = 2200;
-const HOLD_END_MS = 3200;
-
-const BUTTON_CLASS =
-    "grid size-10 cursor-pointer touch-manipulation place-items-center rounded-full text-dark/55 transition-colors duration-150 [-webkit-tap-highlight-color:transparent] hover:bg-dark/5 hover:text-dark focus-visible:bg-dark/5 focus-visible:text-dark focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-accent active:bg-dark/9";
-
 const LINE_CLASS =
     "min-w-0 overflow-hidden rounded-md bg-gray-100 px-2.5 py-1 font-mono text-[12px] whitespace-pre text-dark3 transition-colors duration-350 " +
     "data-[state=current]:bg-violet-500 data-[state=current]:text-light " +
@@ -102,48 +96,7 @@ export default function ReconciliationDemo() {
                     ])}
                 </div>
 
-                <div className="border-t border-light2 px-5 pt-4 pb-3">
-                    <div id="reconcile-demo-caption" className="mb-2 min-h-13 text-base leading-relaxed text-dark/75" />
-
-                    <div className="flex items-center gap-4">
-                        <div className="flex flex-1 items-center gap-1" aria-hidden="true">
-                            {STEPS.map((_, index) => (
-                                <span
-                                    key={String(index)}
-                                    id={domId("tick", index)}
-                                    className="h-0.5 max-w-6 flex-1 rounded-full bg-light2 transition-colors duration-300 data-[state=done]:bg-light3 data-[state=current]:bg-accent"
-                                />
-                            ))}
-                        </div>
-                        <div className="-me-2 flex items-center">
-                            <button
-                                type="button"
-                                id="reconcile-demo-prev"
-                                className={BUTTON_CLASS}
-                                aria-label="Previous step"
-                            >
-                                <Icon icon={ChevronLeft} size={18} />
-                            </button>
-                            <button
-                                type="button"
-                                id="reconcile-demo-play"
-                                className={BUTTON_CLASS}
-                                aria-label="Play or pause"
-                            >
-                                <Icon icon={Pause} size={16} className="hidden group-data-playing/walk:block" />
-                                <Icon icon={Play} size={16} className="block group-data-playing/walk:hidden" />
-                            </button>
-                            <button
-                                type="button"
-                                id="reconcile-demo-next"
-                                className={BUTTON_CLASS}
-                                aria-label="Next step"
-                            >
-                                <Icon icon={ChevronRight} size={18} />
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <StepControls prefix="reconcile-demo" count={STEPS.length} />
             </div>
             <figcaption className="mt-2 text-center text-xs text-gray-500">
                 fig 3.1 - Reconciling children, position by position
@@ -152,99 +105,18 @@ export default function ReconciliationDemo() {
     );
 }
 
-// steps are applied straight to the DOM: a state-driven tick would re-render the whole app every frame.
 function animateReconcile() {
-    const root = document.getElementById("reconcile-demo");
-    if (!root) return undefined;
+    return playSteps({
+        prefix: "reconcile-demo",
+        steps: STEPS,
+        onStep: (current, step) => {
+            const decided = new Set(STEPS.slice(0, step + 1).flatMap((s) => s.decided));
 
-    const byId = (id) => document.getElementById(id);
-    const caption = byId("reconcile-demo-caption");
-    const playButton = byId("reconcile-demo-play");
-    const prevButton = byId("reconcile-demo-prev");
-    const nextButton = byId("reconcile-demo-next");
-
-    let step = 0;
-    let playing = true;
-    let visible = false;
-    let timer = 0;
-
-    const setState = (el, state) => {
-        if (!el) return;
-        if (state) el.dataset.state = state;
-        else delete el.dataset.state;
-    };
-
-    const apply = () => {
-        const current = STEPS[step];
-        const decided = new Set(STEPS.slice(0, step + 1).flatMap((s) => s.decided));
-
-        ROWS.forEach((row, i) => {
-            const state = current.rows.includes(i) ? "current" : decided.has(i) ? "done" : undefined;
-            setState(byId(domId("old", i)), row.old == null ? undefined : state);
-            setState(byId(domId("next", i)), row.next == null ? undefined : state);
-        });
-
-        STEPS.forEach((_, index) => {
-            setState(byId(domId("tick", index)), index === step ? "current" : index < step ? "done" : undefined);
-        });
-
-        if (caption.textContent !== current.text) {
-            caption.textContent = current.text;
-            caption.animate([{ opacity: 0 }, { opacity: 1 }], {
-                duration: 350,
-                easing: "ease-out",
+            ROWS.forEach((row, i) => {
+                const state = current.rows.includes(i) ? "current" : decided.has(i) ? "done" : undefined;
+                setDataState(document.getElementById(domId("old", i)), row.old == null ? undefined : state);
+                setDataState(document.getElementById(domId("next", i)), row.next == null ? undefined : state);
             });
-        }
-        root.toggleAttribute("data-playing", playing);
-    };
-
-    const schedule = () => {
-        clearTimeout(timer);
-        if (!playing || !visible) return;
-        const delay = step === STEPS.length - 1 ? HOLD_END_MS : TICK_MS;
-        timer = setTimeout(() => {
-            step = (step + 1) % STEPS.length;
-            apply();
-            schedule();
-        }, delay);
-    };
-
-    const goTo = (next) => {
-        step = (next + STEPS.length) % STEPS.length;
-        playing = false;
-        apply();
-        schedule();
-    };
-
-    const onPlay = () => {
-        playing = !playing;
-        if (playing && step === STEPS.length - 1) step = 0;
-        apply();
-        schedule();
-    };
-    const onPrev = () => goTo(step - 1);
-    const onNext = () => goTo(step + 1);
-
-    playButton.addEventListener("click", onPlay);
-    prevButton.addEventListener("click", onPrev);
-    nextButton.addEventListener("click", onNext);
-
-    const observer = new IntersectionObserver(
-        ([entry]) => {
-            visible = entry.isIntersecting;
-            schedule();
         },
-        { threshold: 0.4 },
-    );
-    observer.observe(root);
-
-    apply();
-
-    return () => {
-        clearTimeout(timer);
-        observer.disconnect();
-        playButton.removeEventListener("click", onPlay);
-        prevButton.removeEventListener("click", onPrev);
-        nextButton.removeEventListener("click", onNext);
-    };
+    });
 }

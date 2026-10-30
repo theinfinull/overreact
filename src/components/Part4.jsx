@@ -50,7 +50,7 @@ export default function Part4() {
                         updateHostComponent(fiber)
                     }
 
-                    return nextFiber(fiber) // same child → sibling → parent walk
+                    return nextFiber(fiber) // the same child → sibling → parent walk from Chapter Two
                 }
 
                 function updateFunctionComponent(fiber) {
@@ -65,8 +65,9 @@ export default function Part4() {
             `}</CodeBlock>
             <p>
                 <code>toChildElements</code> is our flatten, filter, and text-wrap logic from Chapter One, pulled into a
-                helper. Using it on the result lets a component return an element, an array, text, or null. Null simply
-                means there's nothing to show this time.
+                helper. Running the component's result through it lets a component return an element, an array, text,
+                or null. Null simply means there's nothing to show this time. The host path is exactly what{" "}
+                <code>performUnitOfWork</code> did before, and <code>nextFiber</code> is unchanged.
             </p>
 
             <p>
@@ -81,29 +82,53 @@ export default function Part4() {
                     return parent.dom
                 }
 
-                // in commitWork:
-                const parentDom = findDomParent(fiber)
-                // only insert/update fibers that actually have a dom node
-                if (fiber.effectTag === "PLACEMENT" && fiber.dom) {
-                    parentDom.insertBefore(fiber.dom, nextMountedDom(fiber))
+                function commitWork(fiber) {
+                    if (!fiber) return
+                    const parentDom = findDomParent(fiber)
+
+                    if (fiber.effectTag === "DELETION") {
+                        commitDeletion(fiber, parentDom)
+                        return // don't wander into the old fiber's siblings
+                    }
+                    // only insert/update fibers that actually have a dom node
+                    if (fiber.effectTag === "PLACEMENT" && fiber.dom) {
+                        parentDom.insertBefore(fiber.dom, nextMountedDom(fiber))
+                    } else if (fiber.effectTag === "UPDATE" && fiber.dom) {
+                        updateDom(fiber.dom, fiber.alternate.props, fiber.props)
+                    }
+                    commitWork(fiber.child)
+                    commitWork(fiber.sibling)
                 }
             `}</CodeBlock>
             <p>
                 Deletion needs the same care in the other direction. Removing <code>ProfileCard</code> can't remove{" "}
-                <code>ProfileCard.dom</code> as it doesn't exist. Walk down until you find DOM nodes and remove those
-                instead. If a component returns several host children, remove all of them.
+                <code>ProfileCard.dom</code>, because it doesn't exist. Walk down until you find DOM nodes and remove
+                those instead. If a component returns several host children, remove all of them.
+            </p>
+            <CodeBlock title="commitDeletion.js">{`
+                function commitDeletion(fiber, parentDom) {
+                    if (fiber.dom) {
+                        parentDom.removeChild(fiber.dom)
+                        return
+                    }
+                    for (let child = fiber.child; child; child = child.sibling) {
+                        commitDeletion(child, parentDom)
+                    }
+                }
+            `}</CodeBlock>
+
+            <p>
+                Our insertion helper has the same problem. The next sibling might be a component with no DOM node of its
+                own, so <code>nextMountedDom</code> now looks inside those siblings, and past a DOM-less parent, to find
+                the next node that's really on the page. The full version is in the source below. No wrapper divs needed
+                just to make the renderer happy.
             </p>
 
             <p>
-                Our insertion helper also looks through DOM-less sibling fibers to find the next mounted node. The full
-                version below includes that walk. No wrapper divs needed just to make the renderer happy.
-            </p>
-
-            <p>
-                When we render again, React checks each spot in the tree. If the same function is still in the same
-                spot, React treats it as the same component and only updates its props. If the function is different,
-                React throws the old component away and builds a new one. In the next chapter, we'll rely on this to
-                keep a component's state between renders.
+                When we render again, the reconciler from Chapter Three compares each spot in the tree. A component's{" "}
+                <code>type</code> is its function, so if the same function is still in the same spot, it's the same
+                component and only its props update. If the function is different, the old component is thrown away and
+                a new one is built. In the next chapter, we'll rely on this to keep a component's state between renders.
             </p>
 
             <p>So now we have reusable pieces. Next, we'll give them memory with state.</p>

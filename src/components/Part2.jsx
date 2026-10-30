@@ -5,13 +5,13 @@ import SubTitle from "./SubTitle";
 import Title from "./Title";
 import Callout from "./Callout";
 import ChapterSource from "./ChapterSource";
-import { AlertCircle } from "lucide";
+import { AlertCircle, Lightbulb } from "lucide";
 
 export default function Part2() {
     return (
         <div>
             {/* Theory Stuff */}
-            <Title id="chunking-render" chapter={"Two"}>
+            <Title id="chunking-render" chapter="Two">
                 Rendering In Pieces
             </Title>
             <p>
@@ -64,7 +64,7 @@ export default function Part2() {
 
             <SubTitle id="workloop">Scheduling & Walking The Tree</SubTitle>
             <p>
-                We have our units of work, but nothing to run em yet. That is the job of the work loop. It picks up the
+                We have our units of work, but nothing to run them yet. That is the job of the work loop. It picks up the
                 next unit of work, performs it, checks how much time is left, and either keeps going or hands control
                 back to the browser. It's a small loop, but it's what turns one big blocking render into tiny
                 non-blocking ones.
@@ -74,6 +74,10 @@ export default function Part2() {
                 <code>setTimeout</code>'s more considerate version. Instead of you telling it when to run, the browser
                 looks for an idle period to call it back.
             </p>
+            <Callout icon={Lightbulb} color="blue">
+                Real React doesn't use <code>requestIdleCallback</code>. It has its own scheduler package that also
+                works out how much time is left. We borrow the browser's version because it makes the idea easy to see.
+            </Callout>
 
             <CodeBlock title="workLoop.js">
                 {`
@@ -104,7 +108,8 @@ export default function Part2() {
             </p>
             <p>
                 If work is left over, the loop books itself another turn. And when there's nothing to do, it stops
-                asking, instead of waking up on every idle period for no reason.
+                asking, instead of waking up on every idle period for no reason. The loop leans on <code>scheduled</code>{" "}
+                and <code>scheduleWork</code>, which come right after this.
             </p>
             <CodeBlock title="scheduleWork.js">
                 {`
@@ -127,8 +132,9 @@ export default function Part2() {
                 `}
             </CodeBlock>
             <p>
-                <code>scheduled</code> makes sure only one loop is ever waiting in line. Safari doesn't support{" "}
-                <code>requestIdleCallback</code>, so there we fake it with a <code>setTimeout</code> and a 5ms budget.
+                <code>scheduled</code> makes sure only one loop is ever waiting in line. Some browsers (Safari, at the time
+                of writing) don't support <code>requestIdleCallback</code>, so there we fake it with a{" "}
+                <code>setTimeout</code> and a 5ms budget.
                 And <code>timeout: 100</code> makes sure a busy browser can't put our work off forever. After 100ms, it
                 runs the callback anyway, even with no idle time left. That's the case the at-least-one-unit rule
                 covers.
@@ -171,49 +177,38 @@ export default function Part2() {
                             fiber.dom = createDom(fiber)
                         }
 
-                        const elements = fiber.props.children
-                        let index = 0
-                        let prevSibling = null
-
-                        while (index < elements.length) {
-                            const element = elements[index]
-
-                            const newFiber = {
+                        let previous = null
+                        fiber.props.children.forEach((element, index) => {
+                            const child = {
                                 type: element.type,
                                 props: element.props,
                                 parent: fiber,
                                 dom: null,
                             }
 
-                            if (index === 0) {
-                                fiber.child = newFiber
-                            } else {
-                                prevSibling.sibling = newFiber
-                            }
+                            // the first child hangs off its parent, the rest chain along as siblings
+                            if (index === 0) fiber.child = child
+                            else previous.sibling = child
+                            previous = child
+                        })
 
-                            prevSibling = newFiber
-                            index++
-                        }
+                        return nextFiber(fiber)
+                    }
 
-                        if (fiber.child) {
-                            return fiber.child
-                        }
-
-                        let nextFiber = fiber
-                        while (nextFiber) {
-                            if (nextFiber.sibling) {
-                                return nextFiber.sibling
-                            }
-                            nextFiber = nextFiber.parent
+                    // child first, then sibling, then the parent's sibling
+                    function nextFiber(fiber) {
+                        if (fiber.child) return fiber.child
+                        for (let next = fiber; next; next = next.parent) {
+                            if (next.sibling) return next.sibling
                         }
                         return null
                     }
                 `}
             </CodeBlock>
             <p>
-                To find the next unit of work, we go to the child first, then the sibling, then up to the parent's
-                sibling, and keep going until the tree runs out. Child, sibling, parent's sibling. That's the whole
-                order.
+                <code>nextFiber</code> picks the next unit of work: the child if there is one, otherwise the sibling, and
+                if there's no sibling either, we climb up and try the parent's sibling, until the tree runs out. Child,
+                sibling, parent's sibling. That's the whole order. Press play to watch it:
             </p>
             <FiberTraversal />
             <p>

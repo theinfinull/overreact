@@ -310,9 +310,10 @@ export function useState(initialState) {
     const oldHook = renderingFiber.alternate?.hooks?.[hookIndex];
     const queue = oldHook?.queue ?? [];
     let state = oldHook ? oldHook.state : typeof initialState === "function" ? initialState() : initialState;
-    const processed = queue.length;
+    // snapshot: actions queued after this point stay queued for the next render
+    const pending = queue.slice();
 
-    for (const action of queue.slice(0, processed)) {
+    for (const action of pending) {
         state = typeof action === "function" ? action(state) : action;
     }
 
@@ -326,8 +327,8 @@ export function useState(initialState) {
         state,
         queue,
         dispatch: setState,
-        // only drop the processed actions once committed, so a restarted render can replay them
-        commit: () => queue.splice(0, processed),
+        // only drop the applied actions once committed, so a restarted render can replay them
+        commit: () => queue.splice(0, pending.length),
     };
     renderingFiber.hooks.push(hook);
     hookIndex++;

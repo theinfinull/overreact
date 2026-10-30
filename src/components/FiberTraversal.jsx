@@ -1,6 +1,6 @@
-import { ChevronLeft, ChevronRight, Pause, Play } from "lucide";
 import { useEffect } from "../overreact";
-import Icon from "./Icon";
+import { playSteps, setDataState } from "../util/stepPlayer";
+import StepControls from "./StepControls";
 
 const NODE_W = 64;
 const NODE_H = 30;
@@ -84,12 +84,7 @@ const STEPS = [
     },
 ];
 
-const TICK_MS = 1600;
-const HOLD_END_MS = 3000;
 const DOTTED = { fill: "none", strokeLinecap: "round", strokeDasharray: "0.1 3.5" };
-
-const BUTTON_CLASS =
-    "grid size-10 cursor-pointer touch-manipulation place-items-center rounded-full text-dark/55 transition-colors duration-150 [-webkit-tap-highlight-color:transparent] hover:bg-dark/5 hover:text-dark focus-visible:bg-dark/5 focus-visible:text-dark focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-accent active:bg-dark/9";
 
 const edgeId = (from, to) => `fiber-walk-edge-${from}-${to}`;
 
@@ -198,148 +193,53 @@ export default function FiberTraversal() {
                     ))}
                 </svg>
 
-                <div className="border-t border-light2 px-5 pt-4 pb-3">
-                    <div id="fiber-walk-caption" className="mb-2 min-h-13 text-base leading-relaxed text-dark/75" />
-
-                    <div className="flex items-center gap-4">
-                        <div className="flex flex-1 items-center gap-1" aria-hidden="true">
-                            {STEPS.map((_, index) => (
-                                <span
-                                    key={String(index)}
-                                    id={`fiber-walk-tick-${index}`}
-                                    className="h-0.5 max-w-6 flex-1 rounded-full bg-light2 transition-colors duration-300 data-[state=done]:bg-light3 data-[state=current]:bg-accent"
-                                />
-                            ))}
-                        </div>
-                        <div className="-me-2 flex items-center">
-                            <button type="button" id="fiber-walk-prev" className={BUTTON_CLASS} aria-label="Previous step">
-                                <Icon icon={ChevronLeft} size={18} />
-                            </button>
-                            <button type="button" id="fiber-walk-play" className={BUTTON_CLASS} aria-label="Play or pause">
-                                <Icon icon={Pause} size={16} className="hidden group-data-playing/walk:block" />
-                                <Icon icon={Play} size={16} className="block group-data-playing/walk:hidden" />
-                            </button>
-                            <button type="button" id="fiber-walk-next" className={BUTTON_CLASS} aria-label="Next step">
-                                <Icon icon={ChevronRight} size={18} />
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <StepControls prefix="fiber-walk" count={STEPS.length} />
             </div>
             <figcaption className="mt-2 text-center text-xs text-gray-500">fig 2.3 - Walking the fiber tree</figcaption>
         </figure>
     );
 }
 
-// steps are applied straight to the DOM: a state-driven tick would re-render the whole app every frame.
 function animateTraversal() {
-    const root = document.getElementById("fiber-walk");
-    if (!root) return undefined;
-
     const byId = (id) => document.getElementById(id);
     const trail = byId("fiber-walk-trail");
-    const caption = byId("fiber-walk-caption");
-    const playButton = byId("fiber-walk-play");
-    const prevButton = byId("fiber-walk-prev");
-    const nextButton = byId("fiber-walk-next");
-
-    let step = 0;
-    let playing = true;
-    let visible = false;
-    let timer = 0;
+    if (!trail) return undefined;
 
     const flow = trail.animate([{ strokeDashoffset: 0 }, { strokeDashoffset: -3.6 }], {
         duration: 500,
         iterations: Infinity,
     });
 
-    const apply = () => {
-        const current = STEPS[step];
-        const performed = new Set(
-            STEPS.slice(0, step + 1)
-                .filter((s) => s.move !== "parent")
-                .map((s) => s.at),
-        );
-        const finished = step === STEPS.length - 1;
+    const stop = playSteps({
+        prefix: "fiber-walk",
+        steps: STEPS,
+        tickMs: 1600,
+        holdMs: 3000,
+        onStep: (current, step) => {
+            const performed = new Set(
+                STEPS.slice(0, step + 1)
+                    .filter((s) => s.move !== "parent")
+                    .map((s) => s.at),
+            );
+            const finished = step === STEPS.length - 1;
 
-        Object.keys(NODES).forEach((name) => {
-            const node = byId(`fiber-walk-node-${name}`);
-            if (!node) return;
-            if (name === current.at && !finished) node.dataset.state = "current";
-            else if (performed.has(name)) node.dataset.state = "done";
-            else delete node.dataset.state;
-        });
+            Object.keys(NODES).forEach((name) => {
+                const state =
+                    name === current.at && !finished ? "current" : performed.has(name) ? "done" : undefined;
+                setDataState(byId(`fiber-walk-node-${name}`), state);
+            });
 
-        STEPS.forEach((_, index) => {
-            const tick = byId(`fiber-walk-tick-${index}`);
-            if (!tick) return;
-            if (index === step) tick.dataset.state = "current";
-            else if (index < step) tick.dataset.state = "done";
-            else delete tick.dataset.state;
-        });
-
-        const [a, b] = current.edge?.split("-") ?? [];
-        const edge = EDGES[edgeId(a, b)] ?? EDGES[edgeId(b, a)];
-        trail.setAttribute("d", edge?.d ?? "");
-        if (edge?.sibling) trail.setAttribute("marker-end", "url(#fiber-walk-arrow-active)");
-        else trail.removeAttribute("marker-end");
-        flow?.effect.updateTiming({ direction: current.move === "parent" ? "reverse" : "normal" });
-
-        if (caption.textContent !== current.text) {
-            caption.textContent = current.text;
-            caption.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 350, easing: "ease-out" });
-        }
-        root.toggleAttribute("data-playing", playing);
-    };
-
-    const schedule = () => {
-        clearTimeout(timer);
-        if (!playing || !visible) return;
-        const delay = step === STEPS.length - 1 ? HOLD_END_MS : TICK_MS;
-        timer = setTimeout(() => {
-            step = (step + 1) % STEPS.length;
-            apply();
-            schedule();
-        }, delay);
-    };
-
-    const goTo = (next) => {
-        step = (next + STEPS.length) % STEPS.length;
-        playing = false;
-        apply();
-        schedule();
-    };
-
-    const onPlay = () => {
-        playing = !playing;
-        if (playing && step === STEPS.length - 1) step = 0;
-        apply();
-        schedule();
-    };
-    const onPrev = () => goTo(step - 1);
-    const onNext = () => goTo(step + 1);
-
-    playButton.addEventListener("click", onPlay);
-    prevButton.addEventListener("click", onPrev);
-    nextButton.addEventListener("click", onNext);
-
-    const observer = new IntersectionObserver(
-        ([entry]) => {
-            visible = entry.isIntersecting;
-            schedule();
+            const [a, b] = current.edge?.split("-") ?? [];
+            const edge = EDGES[edgeId(a, b)] ?? EDGES[edgeId(b, a)];
+            trail.setAttribute("d", edge?.d ?? "");
+            if (edge?.sibling) trail.setAttribute("marker-end", "url(#fiber-walk-arrow-active)");
+            else trail.removeAttribute("marker-end");
+            flow.effect.updateTiming({ direction: current.move === "parent" ? "reverse" : "normal" });
         },
-        { threshold: 0.4 },
-    );
-    observer.observe(root);
-
-    apply();
+    });
 
     return () => {
-        clearTimeout(timer);
-        flow?.cancel();
-        observer.disconnect();
-        playButton.removeEventListener("click", onPlay);
-        prevButton.removeEventListener("click", onPrev);
-        nextButton.removeEventListener("click", onNext);
+        flow.cancel();
+        stop?.();
     };
 }

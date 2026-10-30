@@ -30,6 +30,23 @@ export default function Part3() {
                 screen. On the next render, the new root points its <code>alternate</code> at it, and a fresh{" "}
                 <code>deletions</code> array starts collecting old fibers that don’t survive into the new tree.
             </p>
+            <CodeBlock title="render.js">{`
+                let currentRoot = null // the last tree we committed
+                let deletions = []
+
+                function render(element, container) {
+                    wipRoot = {
+                        dom: container,
+                        props: {
+                            children: [element],
+                        },
+                        alternate: currentRoot,
+                    }
+                    deletions = []
+                    nextUnitOfWork = wipRoot
+                    scheduleWork()
+                }
+            `}</CodeBlock>
 
             <p>
                 In <code>performUnitOfWork</code>, swap the child-building loop for{" "}
@@ -109,21 +126,76 @@ export default function Part3() {
             </Callout>
             <SubTitle id="updating-dom">Applying The Changes</SubTitle>
             <p>
-                Reusing a node is only half the job. The <code>updateDom(dom, previous, next)</code> helper clears
-                removed props, assigns changed ones, and swaps out changed event listeners. Remove the old listener
-                before adding the new one, or a click fires both. The full helper is in the source below.
+                Reusing a node is only half the job. The <code>updateDom(dom, previous, next)</code> helper makes the
+                reused node match its new props: it clears the ones that disappeared, assigns the ones that changed, and
+                swaps changed event listeners.
+            </p>
+            <CodeBlock title="updateDom.js">{`
+                const isEvent = (key) => key.startsWith("on")
+                const isProperty = (key) => key !== "children" && !isEvent(key)
+                const eventType = (key) => key.slice(2).toLowerCase()
+
+                function updateDom(dom, previous, next) {
+                    // remove changed listeners before adding new ones, or both would fire
+                    Object.keys(previous)
+                        .filter(isEvent)
+                        .filter((key) => previous[key] !== next[key])
+                        .forEach((key) => dom.removeEventListener(eventType(key), previous[key]))
+
+                    // clear removed props
+                    Object.keys(previous)
+                        .filter(isProperty)
+                        .filter((key) => !(key in next))
+                        .forEach((key) => {
+                            dom[key] = ""
+                        })
+
+                    // assign changed props
+                    Object.keys(next)
+                        .filter(isProperty)
+                        .filter((key) => previous[key] !== next[key])
+                        .forEach((key) => {
+                            dom[key] = next[key]
+                        })
+
+                    // add changed listeners
+                    Object.keys(next)
+                        .filter(isEvent)
+                        .filter((key) => previous[key] !== next[key])
+                        .forEach((key) => dom.addEventListener(eventType(key), next[key]))
+                }
+            `}</CodeBlock>
+            <p>
+                Event props like <code>onClick</code> get their own path. Assigning <code>dom.onClick</code> wouldn't do
+                anything, so we turn the name into an event type (<code>onClick</code> becomes <code>click</code>) and
+                use <code>addEventListener</code>. That also lets us call <code>removeEventListener</code> on the old
+                handler, which is why it has to come before adding the new one. Skip that and a click fires both.
             </p>
 
             <p>
-                New nodes go through the same path. <code>createDom</code> calls <code>updateDom(dom, {"{}"}, fiber.props)</code>,
-                and empty previous props mean everything counts as new.
+                New nodes go through the same path. <code>createDom</code> calls{" "}
+                <code>{"updateDom(dom, {}, fiber.props)"}</code>, and with empty previous props, everything counts as
+                new.
             </p>
 
             <p>
-                The commit phase then carries out the plan. <code>deletions.forEach(commitWork)</code> runs first, then{" "}
-                <code>commitWork(wipRoot.child)</code>, and <code>wipRoot</code> becomes <code>currentRoot</code>. A new node gets inserted before the next already-mounted sibling
-                when there is one. Plain appending would put a replacement in the wrong spot whenever it isn’t the last
-                child.
+                The commit phase then carries out the plan. First <code>deletions.forEach(commitWork)</code> removes the
+                dead nodes, then <code>commitWork(wipRoot.child)</code> places and updates the rest, and finally{" "}
+                <code>wipRoot</code> becomes <code>currentRoot</code>, ready to be the "old tree" next time.
+            </p>
+            <CodeBlock title="commitRoot.js">{`
+                function commitRoot() {
+                    deletions.forEach(commitWork)
+                    commitWork(wipRoot.child)
+                    currentRoot = wipRoot
+                    wipRoot = null
+                    deletions = []
+                }
+            `}</CodeBlock>
+            <p>
+                A new node gets inserted before its next already-mounted sibling, when there is one. Plain appending
+                would put a replacement in the wrong spot whenever it isn’t the last child. We skip siblings that are
+                also brand new, since they aren't on the page yet.
             </p>
             <CodeBlock title="commitWork.js">{`
                 function commitWork(fiber) {
@@ -142,10 +214,18 @@ export default function Part3() {
                     commitWork(fiber.child)
                     commitWork(fiber.sibling)
                 }
+
+                // the first later sibling already on the page, or null to append
+                function nextMountedDom(fiber) {
+                    for (let sibling = fiber.sibling; sibling; sibling = sibling.sibling) {
+                        if (sibling.effectTag !== "PLACEMENT") return sibling.dom
+                    }
+                    return null
+                }
             `}</CodeBlock>
 
             <p>
-                A second render now updates the first instead of rebuilding from scratch. Next, function components.
+                A second render now updates the first one instead of rebuilding from scratch. Next, function components.
                 They let us split our UI into reusable pieces and actually scale our code.
             </p>
             <ChapterSource

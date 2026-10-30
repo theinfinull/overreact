@@ -58,19 +58,21 @@ export default function Part5() {
 
             <p>
                 The setter doesn't edit this render's count. It queues an action and asks the renderer to prepare
-                another tree from <code>currentRoot</code>. Next time the component runs, <code>useState</code> applies the queued actions to the
-                previous state and returns the new value.
+                another tree from <code>currentRoot</code>. Next time the component runs, <code>useState</code> picks
+                up the previous state, replays the queued actions on it, and returns the result. An action is either a
+                new value or an updater function like <code>n =&gt; n + 1</code>.
             </p>
             <CodeBlock title="useState.js">{`
                 function useState(initialState) {
                     if (!renderingFiber) throw new Error("useState needs a rendering component")
                     const oldHook = renderingFiber.alternate?.hooks?.[hookIndex]
                     const queue = oldHook?.queue ?? []
+                    // snapshot: actions queued after this point stay queued for the next render
+                    const pending = queue.slice()
                     let state = oldHook ? oldHook.state
                         : typeof initialState === "function" ? initialState() : initialState
-                    const processed = queue.length
 
-                    for (const action of queue.slice(0, processed)) {
+                    for (const action of pending) {
                         state = typeof action === "function" ? action(state) : action
                     }
 
@@ -80,7 +82,8 @@ export default function Part5() {
                     })
                     const hook = {
                         state, queue, dispatch: setState,
-                        commit: () => queue.splice(0, processed),
+                        // only drop the applied actions once committed, so a restarted render can replay them
+                        commit: () => queue.splice(0, pending.length),
                     }
                     renderingFiber.hooks.push(hook)
                     hookIndex++
@@ -88,23 +91,49 @@ export default function Part5() {
                 }
             `}</CodeBlock>
             <p>
-                That queue is shared with the previous hook, but the new state lives on a new hook object. Only clear
-                processed actions after committing. If unfinished rendering gets restarted, the old committed state and
-                the queued actions are still there to replay. Otherwise a fast click could vanish.
+                Why not empty the queue the moment we use it? Because a render can be thrown away and restarted before
+                it commits. If the queue were already drained, the restarted render would begin from the old state and
+                the click would vanish. So each hook remembers which actions it applied, and the commit removes exactly
+                those. Anything queued in the meantime stays for the next render. The queue array itself is shared from
+                render to render, and so is the <code>setState</code> function, which is why a stale closure can still
+                call it safely.
             </p>
 
             <p>
-                <code>scheduleUpdate</code> starts a fresh work-in-progress root from <code>currentRoot</code>'s DOM and props,
-                with <code>currentRoot</code> as its alternate. That reruns components, reconciles their elements, and commits changes -
-                it doesn't replace every node. The full helper is in the final source.
+                <code>scheduleUpdate</code> starts a fresh work-in-progress root from <code>currentRoot</code>'s DOM and
+                props, with <code>currentRoot</code> as its alternate. That reruns components, reconciles their
+                elements, and commits changes. It doesn't replace every node. <code>render</code> now shares the same{" "}
+                <code>startRender</code> helper.
             </p>
+            <CodeBlock title="scheduleUpdate.js">{`
+                function scheduleUpdate() {
+                    if (!currentRoot) return
+                    startRender({
+                        dom: currentRoot.dom,
+                        props: currentRoot.props,
+                        alternate: currentRoot,
+                    })
+                }
+
+                // a fresh work-in-progress root, replacing any unfinished one
+                function startRender(root) {
+                    wipRoot = root
+                    deletions = []
+                    nextUnitOfWork = wipRoot
+                    scheduleWork()
+                }
+            `}</CodeBlock>
 
             <p>
                 Try the two small buttons on Byte's console. "+3 QUEUED" makes three{" "}
                 <code>{"setCount(n => n + 1)"}</code> calls, and each builds on the previous result. "+3 STALE" makes
                 three <code>setCount(count + 1)</code> calls, which all queue the same value from this render's
-                snapshot, giving just +1. State belongs to this component's place in the tree; flip the power switch,
-                and removing it loses its memory.
+                snapshot, giving just +1.
+            </p>
+            <p>
+                State also belongs to the component's place in the tree. Flip the power switch to remove Byte, and its
+                memory goes with it. That's the same "different function or missing, so throw it away" rule from the
+                last chapter.
             </p>
 
             <p>
@@ -113,9 +142,10 @@ export default function Part5() {
                 pause or abandon that work before it ever reaches the screen.
             </p>
             <p>
-                <code>useEffect</code> takes the next hook slot too, storing dependencies and cleanup. Compare dependencies with the
-                previous slot using <code>Object.is</code>. If they changed, record a commit callback that runs the old
-                cleanup, calls the effect, and saves its returned cleanup. Here's how we'd use it:
+                <code>useEffect</code> takes the next hook slot too, storing its dependencies and cleanup. It compares the
+                dependencies with the previous slot using <code>Object.is</code>. If they changed, it records a commit
+                callback that runs the old cleanup, calls the effect, and saves the cleanup it returns. Here's how we'd
+                use it:
             </p>
 
             <CodeBlock title="Byte.jsx — syncing with the browser">{`
@@ -125,13 +155,67 @@ export default function Part5() {
                     return () => { document.title = previousTitle }
                 }, [count])
             `}</CodeBlock>
+            <CodeBlock title="useEffect.js">{`
+                function useEffect(effect, deps) {
+                    if (!renderingFiber) throw new Error("useEffect needs a rendering component")
+                    const oldHook = renderingFiber.alternate?.hooks?.[hookIndex]
+                    const hook = { deps, cleanup: oldHook?.cleanup }
+
+                    if (depsChanged(oldHook?.deps, deps)) {
+                        hook.commit = () => {
+                            runCleanup(hook)
+                            const cleanup = effect()
+                            hook.cleanup = typeof cleanup === "function" ? cleanup : undefined
+                        }
+                    }
+                    hook.unmount = () => runCleanup(hook)
+
+                    renderingFiber.hooks.push(hook)
+                    hookIndex++
+                }
+
+                function runCleanup(hook) {
+                    hook.cleanup?.()
+                    hook.cleanup = undefined
+                }
+
+                // no deps array (or no previous render) means run every commit
+                function depsChanged(oldDeps, deps) {
+                    if (!oldDeps || !deps) return true
+                    return oldDeps.length !== deps.length || deps.some((dep, i) => !Object.is(dep, oldDeps[i]))
+                }
+            `}</CodeBlock>
             <p>
-                After saving the committed tree, walk its hooks and run their <code>commit</code> callbacks. Before
-                deleting a subtree, run its <code>unmount</code> callbacks to clean up effects. The final source
-                includes both walks and the useEffect implementation.
+                Nothing runs during render. The effect is only recorded on the hook, and the commit phase walks the
+                finished tree to call it. Deleted subtrees get a similar walk first, so effects can clean up before
+                their DOM disappears.
             </p>
+            <CodeBlock title="commit.js — running effects">{`
+                function commitRoot() {
+                    deletions.forEach(commitWork)
+                    commitWork(wipRoot.child)
+                    const committed = wipRoot
+                    currentRoot = committed
+                    wipRoot = null
+                    deletions = []
+
+                    // after wipRoot is cleared, so an effect calling setState can start a new render
+                    visitHooks(committed, "commit")
+                }
+
+                // in commitWork, for a deleted fiber, before its dom is removed:
+                visitHooks(fiber, "unmount")
+
+                function visitHooks(fiber, callback) {
+                    fiber.hooks?.forEach((hook) => hook[callback]?.())
+                    for (let child = fiber.child; child; child = child.sibling) {
+                        visitHooks(child, callback)
+                    }
+                }
+            `}</CodeBlock>
+            <p>The dependency array decides when an effect runs:</p>
             <ul>
-                <li>No dependency array: run after every commit for this component.</li>
+                <li>No dependency array: run after every commit.</li>
                 <li>
                     <code>[]</code>: run when it mounts; clean up when it unmounts.
                 </li>
