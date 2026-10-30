@@ -127,7 +127,7 @@ function Screen({
 // printed lettering on the console shell
 const label = "font-sans text-[0.7rem] font-bold tracking-[0.12em] text-gb-ink select-none";
 // shallow groove moulded into the shell around a button
-const well = "rounded-full bg-dark/[0.06] shadow-[inset_0_1px_3px_rgb(0_0_0/0.16),0_1px_0_rgb(255_255_255/0.8)]";
+const well = "rounded-full bg-dark/6 shadow-[inset_0_1px_3px_rgb(0_0_0/0.16),0_1px_0_rgb(255_255_255/0.8)]";
 
 const round =
     "block size-12 shrink-0 cursor-pointer rounded-full bg-gb-button ring-1 ring-gb-button-dark/60 " +
@@ -143,10 +143,10 @@ const arrow =
     "flex cursor-pointer items-center justify-center bg-[#1e1e1d] enabled:active:bg-black disabled:cursor-default";
 const ridge = "rounded-full bg-black/70 shadow-[0_1px_0_rgb(255_255_255/0.1)]";
 const ARROWS = [
-    { label: "Up", look: [0, -1], across: true, className: "col-start-2 rounded-t-[4px]" },
-    { label: "Left", look: [-1, 0], across: false, className: "col-start-1 row-start-2 rounded-l-[4px]" },
-    { label: "Right", look: [1, 0], across: false, className: "col-start-3 row-start-2 rounded-r-[4px]" },
-    { label: "Down", look: [0, 1], across: true, className: "col-start-2 row-start-3 rounded-b-[4px]" },
+    { label: "Up", look: [0, -1], across: true, className: "col-start-2 rounded-t-sm" },
+    { label: "Left", look: [-1, 0], across: false, className: "col-start-1 row-start-2 rounded-l-sm" },
+    { label: "Right", look: [1, 0], across: false, className: "col-start-3 row-start-2 rounded-r-sm" },
+    { label: "Down", look: [0, 1], across: true, className: "col-start-2 row-start-3 rounded-b-sm" },
 ];
 
 function DPad({ onPress, off }) {
@@ -161,7 +161,7 @@ function DPad({ onPress, off }) {
                     aria-label={`Look ${label.toLowerCase()}`}
                     className={`${arrow} ${className}`}
                 >
-                    <span className={`flex gap-[3px] ${across ? "flex-col" : ""}`} aria-hidden="true">
+                    <span className={`flex gap-0.75 ${across ? "flex-col" : ""}`} aria-hidden="true">
                         {[0, 1, 2].map((n) => (
                             <span key={n} className={`${ridge} ${across ? "h-0.5 w-3.5" : "h-3.5 w-0.5"}`} />
                         ))}
@@ -194,7 +194,7 @@ function Controls({
                 <div className="relative flex shrink-0 items-center gap-3 pb-5 pr-1">
                     <span
                         aria-hidden="true"
-                        className={`${well} absolute left-[-0.375rem] top-[-0.375rem] h-15 w-[7.875rem] origin-[1.875rem_1.875rem] translate-y-3.5 -rotate-[25deg]`}
+                        className={`${well} absolute -left-1.5 -top-1.5 h-15 w-31.5 origin-[1.875rem_1.875rem] translate-y-3.5 -rotate-25`}
                     />
                     <div className="relative translate-y-3.5">
                         <button
@@ -204,7 +204,7 @@ function Controls({
                             aria-label="Clear score"
                             className={round}
                         />
-                        <span className="absolute left-1/2 top-1/2 -rotate-[25deg]">
+                        <span className="absolute left-1/2 top-1/2 -rotate-25">
                             <span className={`${label} absolute -translate-x-1/2 translate-y-7 whitespace-nowrap`}>
                                 CLEAR
                             </span>
@@ -218,7 +218,7 @@ function Controls({
                             aria-label={`Click Byte. Score ${count}`}
                             className={round}
                         />
-                        <span className="absolute left-1/2 top-1/2 -rotate-[25deg]">
+                        <span className="absolute left-1/2 top-1/2 -rotate-25">
                             <span className={`${label} absolute -translate-x-1/2 translate-y-7 whitespace-nowrap`}>
                                 CLICK
                             </span>
@@ -227,7 +227,7 @@ function Controls({
                 </div>
             </div>
             <div className="flex justify-center gap-4 pr-20">
-                <div className="flex -rotate-[25deg] flex-col items-center gap-1.5">
+                <div className="flex -rotate-25 flex-col items-center gap-1.5">
                     <span className={`${well} p-1`}>
                         <button
                             type="button"
@@ -239,7 +239,7 @@ function Controls({
                     </span>
                     <span className={`${label} whitespace-nowrap`}>+3 STALE</span>
                 </div>
-                <div className="flex -rotate-[25deg] flex-col items-center gap-1.5">
+                <div className="flex -rotate-25 flex-col items-center gap-1.5">
                     <span className={`${well} p-1`}>
                         <button
                             type="button"
@@ -381,7 +381,7 @@ export default function Counter() {
 
             <div
                 aria-hidden="true"
-                className="pointer-events-none absolute bottom-6 right-6 flex -rotate-[25deg] gap-2"
+                className="pointer-events-none absolute bottom-6 right-6 flex -rotate-25 gap-2"
             >
                 {[0, 1, 2, 3, 4].map((rib) => (
                     <span key={rib} className={`${well} h-11 w-1.5`} />

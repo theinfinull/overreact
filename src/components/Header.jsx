@@ -2,14 +2,14 @@ import { useEffect } from "../overreact";
 import { watchNavTitleColor } from "../util/headerColorToggler";
 
 const BLUR_STEPS = [
-    "z-[1] backdrop-blur-[64px] mask-[linear-gradient(to_bottom,#000_0%,transparent_12.5%)]",
-    "z-[2] backdrop-blur-[32px] mask-[linear-gradient(to_bottom,#000_0%,#000_12.5%,transparent_25%)]",
-    "z-[2] backdrop-blur-[16px] mask-[linear-gradient(to_bottom,transparent_0%,#000_12.5%,#000_25%,transparent_37.5%)]",
-    "z-[3] backdrop-blur-[8px] mask-[linear-gradient(to_bottom,transparent_12.5%,#000_25%,#000_37.5%,transparent_50%)]",
-    "z-[4] backdrop-blur-[4px] mask-[linear-gradient(to_bottom,transparent_25%,#000_37.5%,#000_50%,transparent_62.5%)]",
-    "z-[5] backdrop-blur-[2px] mask-[linear-gradient(to_bottom,transparent_37.5%,#000_50%,#000_62.5%,transparent_75%)]",
-    "z-[6] backdrop-blur-[1px] mask-[linear-gradient(to_bottom,transparent_50%,#000_62.5%,#000_75%,transparent_87.5%)]",
-    "z-[7] backdrop-blur-[0.5px] mask-[linear-gradient(to_bottom,transparent_62.5%,#000_75%,#000_87.5%,transparent_100%)]",
+    "z-1 backdrop-blur-3xl mask-[linear-gradient(to_bottom,#000_0%,transparent_12.5%)]",
+    "z-2 backdrop-blur-[32px] mask-[linear-gradient(to_bottom,#000_0%,#000_12.5%,transparent_25%)]",
+    "z-2 backdrop-blur-lg mask-[linear-gradient(to_bottom,transparent_0%,#000_12.5%,#000_25%,transparent_37.5%)]",
+    "z-3 backdrop-blur-sm mask-[linear-gradient(to_bottom,transparent_12.5%,#000_25%,#000_37.5%,transparent_50%)]",
+    "z-4 backdrop-blur-xs mask-[linear-gradient(to_bottom,transparent_25%,#000_37.5%,#000_50%,transparent_62.5%)]",
+    "z-5 backdrop-blur-[2px] mask-[linear-gradient(to_bottom,transparent_37.5%,#000_50%,#000_62.5%,transparent_75%)]",
+    "z-6 backdrop-blur-[1px] mask-[linear-gradient(to_bottom,transparent_50%,#000_62.5%,#000_75%,transparent_87.5%)]",
+    "z-7 backdrop-blur-[0.5px] mask-[linear-gradient(to_bottom,transparent_62.5%,#000_75%,#000_87.5%,transparent_100%)]",
 ];
 
 export default function Header() {

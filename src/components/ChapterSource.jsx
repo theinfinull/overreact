@@ -24,8 +24,8 @@ export default function ChapterSource({ eyebrow, title, children, zipHref, stack
             </div>
 
             <div className="relative flex flex-col justify-center gap-2.5 border-t-2 border-dashed border-dark bg-accent p-6 sm:border-l-2 sm:border-t-0">
-                <span aria-hidden="true" className={`${notch} top-[-12.5px] [clip-path:inset(50%_0_0_0)]`} />
-                <span aria-hidden="true" className={`${notch} bottom-[-12.5px] [clip-path:inset(0_0_50%_0)]`} />
+                <span aria-hidden="true" className={`${notch} -top-3.125 [clip-path:inset(50%_0_0_0)]`} />
+                <span aria-hidden="true" className={`${notch} -bottom-3.125 [clip-path:inset(0_0_50%_0)]`} />
 
                 <a
                     href={zipHref}
