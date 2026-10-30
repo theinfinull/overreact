@@ -34,7 +34,7 @@ export default function Part2() {
             <p>
                 Which means we need more than just an element. We need a data structure of nodes that also knows where
                 to go next. We'll call these <span className="font-bold">fibers</span>. Each one holds the element's{" "}
-                <code>type</code> and <code>props</code>, same as before, plus three new links:
+                <code>type</code> and <code>props</code>, same as before, plus three new links and a dom node:
             </p>
             <Illustration
                 src="/images/diagrams/fiber-tree.svg"

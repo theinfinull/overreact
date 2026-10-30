@@ -9,6 +9,7 @@ import Part3 from "./components/Part3";
 import Part4 from "./components/Part4";
 import Part5 from "./components/Part5";
 import Conclusion from "./components/Conclusion";
+import Comments from "./components/Comments";
 
 export default function App() {
     return (
@@ -24,6 +25,7 @@ export default function App() {
                 <Part4 />
                 <Part5 />
                 <Conclusion />
+                <Comments />
             </ContentLayout>
 
             <Footer />

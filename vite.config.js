@@ -3,6 +3,9 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
     plugins: [tailwindcss()],
+    server: {
+        headers: { "Access-Control-Allow-Origin": "*" },
+    },
     esbuild: {
         include: /\.jsx$/,
         jsxFactory: "createElement",

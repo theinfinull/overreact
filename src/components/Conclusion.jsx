@@ -43,7 +43,8 @@ export default function Conclusion() {
                 , ready to tinker with. Break it, trace a render, add a hook. And next time someone says “React will
                 handle this”, you'll have a pretty good idea how.
             </p>
-            <div className="mb-8 text-violet-600">** Thanks for building along. Go make something weird. **</div>
+
+            <p>Thanks for building along! 🎉</p>
         </div>
     );
 }
