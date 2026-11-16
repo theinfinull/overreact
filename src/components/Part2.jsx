@@ -74,7 +74,7 @@ export default function Part2() {
                 <code>setTimeout</code>'s more considerate version. Instead of you telling it when to run, the browser
                 looks for an idle period to call it back.
             </p>
-            <Callout icon={Lightbulb} color="blue">
+            <Callout icon={Lightbulb} color="accent">
                 Real React doesn't use <code>requestIdleCallback</code>. It has its own scheduler package that also
                 works out how much time is left. We borrow the browser's version because it makes the idea easy to see.
             </Callout>

@@ -12,30 +12,34 @@ export default function Part5() {
                 Hooks
             </Title>
             <p>
-                Functions forget. Run a component with <code>let count = 0</code>, increment count in a click handler,
-                then run it again - you're back at zero. And changing that local variable doesn't tell our renderer to
-                do anything anyway. We need both memory and a way to request another render.
+                Every render runs your component function from the top. Write <code>let count = 0</code> inside it,
+                bump it in a click handler, and the next render puts it right back to zero. Even if it did stick,
+                nothing told the renderer to paint again. Hooks fix both. They give the function a memory that
+                outlives the call, and a way to ask for another one.
             </p>
             <p>
-                That's what <code>useState</code> gives us. The component asks for a state slot; the renderer keeps it between
-                renders. Let's give that idea a face. Meet Byte. Byte has exactly one job: getting pressed.
+                <code>useState</code> gives you a value and a setter.
             </p>
-            <Counter />
-            <CodeBlock title="Byte.jsx">{`
-                function Byte() {
+            <CodeBlock title="score.jsx">{`
+                function Score() {
                     const [count, setCount] = useState(0)
                     return (
-                        <button onClick={() => setCount(n => n + 1)}>
-                            {count === 0 ? "Press me!" : "Hey!"} — {count} presses
+                        <button onClick={() => setCount(count + 1)}>
+                            {count}
                         </button>
                     )
                 }
             `}</CodeBlock>
-
             <p>
-                Each function fiber gets a <code>hooks</code> array. While calling its component, we remember which
-                fiber is rendering and reset a hook index to zero. Each <code>useState</code> call takes the next slot. On the next
-                render, the same slot on the alternate fiber holds the previous state.
+                First render, you get <code>0</code>. That's the initial state. Click, and <code>1</code> gets stored
+                while a new render is requested. The render you're in still shows <code>0</code>. Only when{" "}
+                <code>Score</code> runs again does <code>useState</code> hand back <code>1</code>.
+            </p>
+            <p>
+                So where does that memory live? On the function fiber, in a list called <code>hooks</code>. When a
+                component starts running, we note which fiber it is and reset the list. Every hook call takes the next
+                spot. The first <code>useState</code> is spot 0, the next is spot 1. On the following render, that
+                same spot on the previous fiber still holds the old state.
             </p>
             <CodeBlock title="updateFunctionComponent.js">{`
                 let renderingFiber = null
@@ -50,17 +54,46 @@ export default function Part5() {
                     reconcileChildren(fiber, toChildElements([result]))
                 }
             `}</CodeBlock>
-            <Callout icon={AlertCircle} color="orange">
-                Slots have positions, not variable names. Call hooks at the top level, in the same order every render.
-                Put one inside an if or loop and the next hook can read the wrong slot. Also, call them only from
-                components or custom hooks while a component is rendering.
+            <Callout icon={AlertCircle} color="yellow">
+                Hooks match by position, not by name. Spot 0 is whichever hook ran first, whatever you called the
+                variable. So call them at the top, in the same order every render, and only while a component is
+                rendering. Put one inside an <code>if</code> or a loop and a spot can get skipped. Then the next hook
+                reads the wrong one.
             </Callout>
-
             <p>
-                The setter doesn't edit this render's count. It queues an action and asks the renderer to prepare
-                another tree from <code>currentRoot</code>. Next time the component runs, <code>useState</code> picks
-                up the previous state, replays the queued actions on it, and returns the result. An action is either a
-                new value or an updater function like <code>n =&gt; n + 1</code>.
+                The setter just stores an update. Pass a plain value and it means "use this next". Pass a function and
+                it means "take the latest value and work out the next one". With a single update, both do the same
+                thing. Fire several in one turn, before the next render, and they split apart.
+            </p>
+            <p>
+                Say <code>count</code> is 4 right now.
+            </p>
+            <CodeBlock title="three updates, two results">{`
+                setCount(count + 1)
+                setCount(count + 1)
+                setCount(count + 1)
+                // every call reads 4, so the queue is 5, 5, 5
+                // replay ends at 5
+
+                setCount(n => n + 1)
+                setCount(n => n + 1)
+                setCount(n => n + 1)
+                // replay runs 4 → 5 → 6 → 7
+            `}</CodeBlock>
+            <p>
+                The first three calls all read <code>count</code> from this render, so each one queues a{" "}
+                <code>5</code>. Replay walks the queue. Set 5, set 5, set 5. The last write wins and the count only
+                grows by 1. That's the stale update. The number was copied before any update ran.
+            </p>
+            <p>
+                The other three queue functions. Replay starts at 4. The first returns 5. The second gets that 5 and
+                returns 6. The third returns 7. The count grows by 3. If the next value depends on the current one,
+                use the function form.
+            </p>
+            <p>
+                <code>useState</code> does that replay. It loads the previous spot, plays the queued updates on top,
+                and hands back the result along with the setter. The very first render has no previous spot, so it uses{" "}
+                <code>initialState</code>. Pass a function there and it gets called once to produce that first value.
             </p>
             <CodeBlock title="useState.js">{`
                 function useState(initialState) {
@@ -91,19 +124,18 @@ export default function Part5() {
                 }
             `}</CodeBlock>
             <p>
-                Why not empty the queue the moment we use it? Because a render can be thrown away and restarted before
-                it commits. If the queue were already drained, the restarted render would begin from the old state and
-                the click would vanish. So each hook remembers which actions it applied, and the commit removes exactly
-                those. Anything queued in the meantime stays for the next render. The queue array itself is shared from
-                render to render, and so is the <code>setState</code> function, which is why a stale closure can still
-                call it safely.
+                Those updates stay in the queue until commit. A render can get thrown away and restarted before it
+                ever reaches the screen, and the new attempt still needs them. So commit only drops the ones this
+                render already applied. Anything that showed up after the snapshot waits for the next render.
             </p>
-
             <p>
-                <code>scheduleUpdate</code> starts a fresh work-in-progress root from <code>currentRoot</code>'s DOM and
-                props, with <code>currentRoot</code> as its alternate. That reruns components, reconciles their
-                elements, and commits changes. It doesn't replace every node. <code>render</code> now shares the same{" "}
-                <code>startRender</code> helper.
+                The setter is kept too, so a click handler from an old render can still call it. What goes stale is
+                the <code>count</code> that handler read, if it passes a number.
+            </p>
+            <p>
+                <code>scheduleUpdate</code> kicks off the next render from the tree that's on screen. Components run,
+                elements get reconciled, and the DOM changes only where it must. <code>render</code> goes through the
+                same <code>startRender</code> helper.
             </p>
             <CodeBlock title="scheduleUpdate.js">{`
                 function scheduleUpdate() {
@@ -123,38 +155,30 @@ export default function Part5() {
                     scheduleWork()
                 }
             `}</CodeBlock>
-
             <p>
-                Try the two small buttons on Byte's console. "+3 QUEUED" makes three{" "}
-                <code>{"setCount(n => n + 1)"}</code> calls, and each builds on the previous result. "+3 STALE" makes
-                three <code>setCount(count + 1)</code> calls, which all queue the same value from this render's
-                snapshot, giving just +1.
+                State lives on that fiber. Take the component out of the tree and the fiber goes with it, hooks and
+                all. Mount it again later and you get a brand new fiber with the initial state. Same rule as last
+                chapter. A different function in that spot, or nothing there, and the old fiber is thrown away.
             </p>
             <p>
-                State also belongs to the component's place in the tree. Flip the power switch to remove Byte, and its
-                memory goes with it. That's the same "different function or missing, so throw it away" rule from the
-                last chapter.
+                State is what the screen should show. An effect is something that should happen after the screen
+                updates, and might need undoing later. A timer, a subscription, <code>document.title</code>. Doing
+                that work during render is a bad idea, because that render might never commit.
             </p>
-
-            <p>
-                State describes the UI. Sometimes a component also needs to synchronize with something outside that UI:
-                a browser event, a subscription, or <code>document.title</code>. Doing that during rendering is awkward - we might
-                pause or abandon that work before it ever reaches the screen.
-            </p>
-            <p>
-                <code>useEffect</code> takes the next hook slot too, storing its dependencies and cleanup. It compares the
-                dependencies with the previous slot using <code>Object.is</code>. If they changed, it records a commit
-                callback that runs the old cleanup, calls the effect, and saves the cleanup it returns. Here's how we'd
-                use it:
-            </p>
-
-            <CodeBlock title="Byte.jsx — syncing with the browser">{`
+            <CodeBlock title="document-title.jsx">{`
                 useEffect(() => {
                     const previousTitle = document.title
-                    document.title = count + " presses — Overreact"
-                    return () => { document.title = previousTitle }
+                    document.title = count + " clicks"
+                    return () => {
+                        document.title = previousTitle
+                    }
                 }, [count])
             `}</CodeBlock>
+            <p>
+                <code>useEffect</code> takes the next spot too. It saves the dependency list and the cleanup from last
+                time. If a dependency changed, it records a commit step. Run the old cleanup, run the effect, then save
+                whatever cleanup the effect returns.
+            </p>
             <CodeBlock title="useEffect.js">{`
                 function useEffect(effect, deps) {
                     if (!renderingFiber) throw new Error("useEffect needs a rendering component")
@@ -186,9 +210,8 @@ export default function Part5() {
                 }
             `}</CodeBlock>
             <p>
-                Nothing runs during render. The effect is only recorded on the hook, and the commit phase walks the
-                finished tree to call it. Deleted subtrees get a similar walk first, so effects can clean up before
-                their DOM disappears.
+                The effect itself waits for commit. Commit walks the finished tree and runs the steps that were
+                recorded. Deleted fibers go first, so their cleanup runs before their DOM disappears.
             </p>
             <CodeBlock title="commit.js — running effects">{`
                 function commitRoot() {
@@ -213,24 +236,33 @@ export default function Part5() {
                     }
                 }
             `}</CodeBlock>
-            <p>The dependency array decides when an effect runs:</p>
+            <p>The dependency list decides when that step gets recorded.</p>
             <ul>
-                <li>No dependency array: run after every commit.</li>
+                <li>No list. It runs after every commit.</li>
                 <li>
-                    <code>[]</code>: run when it mounts; clean up when it unmounts.
+                    <code>[]</code> runs after the first commit. Cleanup runs when the component is removed.
                 </li>
                 <li>
-                    <code>[count]</code>: run on mount and when count changes, comparing with <code>Object.is</code>.
+                    <code>[count]</code> runs after the first commit, and again whenever <code>count</code> changes.
+                    The comparison is <code>Object.is</code>.
                 </li>
             </ul>
-            <Callout icon={Lightbulb} color="blue">
-                Our effects run synchronously at the end of commit. React schedules passive effects separately; we're
-                teaching dependencies and cleanup, not its exact timing.
+            <Callout icon={Lightbulb} color="accent">
+                Our effects run at the very end of commit. React runs <code>useEffect</code> a little later. The
+                dependencies and the cleanup work the same way though.
             </Callout>
             <p>
-                And that's a hook. No secret syntax inside JavaScript - just an ordered record on a fiber, and a
-                renderer that knows when to read it, update it, and clean it up. Byte can finally remember your pokes.
+                So a hook is just the next spot on the fiber. <code>useState</code> keeps a value and a queue.{" "}
+                <code>useEffect</code> keeps a dependency list and a cleanup. The renderer fills the spots in order,
+                then commits them or cleans them up.
             </p>
+            <p>
+                The console below shows all of it. Click calls <code>{"setCount(n => n + 1)"}</code>, so every press
+                adds one. +3 stale calls <code>{"setCount(count + 1)"}</code> three times, and the score moves by one.
+                +3 queued calls <code>{"setCount(n => n + 1)"}</code> three times, and it moves by three. The power
+                switch removes the component holding the score. Flip it back on and you start again from zero.
+            </p>
+            <Counter />
             <ChapterSource
                 eyebrow="Version Five"
                 title="Source Till Now"

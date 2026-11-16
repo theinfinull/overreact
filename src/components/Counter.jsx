@@ -215,7 +215,7 @@ function Controls({
                             type="button"
                             onClick={onPoke}
                             disabled={off}
-                            aria-label={`Click Byte. Score ${count}`}
+                            aria-label={`Click. Score ${count}`}
                             className={round}
                         />
                         <span className="absolute left-1/2 top-1/2 -rotate-25">

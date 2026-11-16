@@ -36,8 +36,8 @@ export default function Part1() {
                 className="pl-6"
             ></Illustration>
             <p>
-                In simple terms, <code>createElement</code> takes its arguments and builds a plain object out of them -
-                that's a React element. Hand that object to <code>render</code>, and it turns into actual DOM.
+                In simple terms, <code>createElement</code> takes its arguments and builds a plain object out of them.
+                That's a React element. Hand that object to <code>render</code>, and it turns into actual DOM.
             </p>
 
             {/* Coding Stuff */}
@@ -74,9 +74,9 @@ export default function Part1() {
             `}
             </CodeBlock>
             <p>
-                (React keeps a lone string child as-is, like <code>children: "Hello"</code> above. Our own{" "}
+                React keeps a lone string child as-is, like <code>children: "Hello"</code> above. Our own{" "}
                 <code>createElement</code> will always produce an array of children, which makes walking the tree a lot
-                simpler.)
+                simpler.
             </p>
             <p>
                 That's really all there is to parsing and rendering. The only job left is to make a universal{" "}
@@ -140,10 +140,10 @@ export default function Part1() {
             </CodeBlock>
 
             <p>
-                Arrays show up when you map a list: <code>{"{items.map(...)}"}</code> hands <code>createElement</code> an
-                array inside its children, so we flatten it. Null and booleans show up in conditional JSX like{" "}
-                <code>{"{isOpen && <Menu />}"}</code>, and they render nothing, so we skip them. Numbers stay, since even
-                zero is valid text.
+                Arrays show up when you map a list: <code>{"{items.map(...)}"}</code> hands <code>createElement</code>{" "}
+                an array inside its children, so we flatten it. Null and booleans show up in conditional JSX like{" "}
+                <code>{"{isOpen && <Menu />}"}</code>, and they render nothing, so we skip them. Numbers stay, since
+                even zero is valid text.
             </p>
 
             <p>
@@ -202,8 +202,8 @@ export default function Part1() {
                 Now props get assigned generically instead of one at a time, and children are handled recursively.
                 Because we wrapped those leaf primitives, every child is already an element, so <code>render</code> can
                 walk them the same way. The only extra branch is creating a text node when <code>type</code> is{" "}
-                <code>TEXT_ELEMENT</code>. And since a text element keeps its text under <code>nodeValue</code>, the very
-                property a DOM text node expects, the same props loop fills it in with no special case.
+                <code>TEXT_ELEMENT</code>. And since a text element keeps its text under <code>nodeValue</code>, the
+                very property a DOM text node expects, the same props loop fills it in with no special case.
             </p>
 
             <p>Wire 'em up, and we've got ourselves a simple renderer.</p>
@@ -220,9 +220,9 @@ export default function Part1() {
             </CodeBlock>
 
             <p>
-                Now the renderer can mount any element you throw at it. But there's a catch: <code>render</code> recurses
-                through the whole tree without ever stopping, and a huge tree can freeze the page while it does. We'll
-                fix that in the next chapter.
+                Now the renderer can mount any element you throw at it. But there's a catch: <code>render</code>{" "}
+                recurses through the whole tree without ever stopping, and a huge tree can freeze the page while it
+                does. We'll fix that in the next chapter.
             </p>
 
             <ChapterSource
